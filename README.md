@@ -21,6 +21,12 @@ CelerBuild is a simple, self-hosted deployment system for individuals and teams.
 
 Explore More CelerBuild Features: [Standard Features](https://celerbuild.com/standard-features) and [Pro Features](https://celerbuild.com/pro-features)
 
+### Documentation
+For detailed information on how to use CelerBuild, please visit our [Documentation](https://celerbuild.com/docs/).
+
+## Download
+You can download the latest version of CelerBuild from our [official download page](https://celerbuild.com/download). We offer versions for both macOS and Linux, supporting x86-64 and ARM64 architectures.
+
 ## Community and Support
 
 We believe in the power of community and open communication. Here are several ways to get involved, stay updated, and get support:
@@ -37,13 +43,13 @@ Follow our development and get the latest news:
 - Follow us on [X (Twitter)](https://x.com/CelerBuild)
 - Star and watch this repository on [GitHub](https://github.com/celerbuild/celerbuild)
 
-### Documentation
-For detailed information on how to use CelerBuild, please visit our [Documentation](https://celerbuild.com/docs/).
-
 ### Support
 If you need help or have any questions, you can:
 - Check our [FAQ](https://celerbuild.com/docs/faq)
 - Open an [issue](https://github.com/celerbuild/celerbuild/issues) for bug reports or feature requests
 - Email us at [hi@celerbuild.com](mailto:hi@celerbuild.com) for direct support
+
+## Pricing
+CelerBuild offers flexible pricing plans to suit different needs. For more information about our Standard and Pro plans, please visit our [pricing page](https://celerbuild.com/pricing).
 
 We appreciate your feedback and contributions to make CelerBuild better!
