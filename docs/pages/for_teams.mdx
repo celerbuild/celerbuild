@@ -1,0 +1,72 @@
+# CelerBuild Pro: For Teams
+
+The Pro version of CelerBuild is designed specifically for team use, enhancing the standard version with advanced features for user management and project organization.
+
+import { Callout } from 'nextra-theme-docs'
+
+<Callout type="info">
+    This guide assumes you have subscribed to the Pro plan.
+</Callout>
+
+## Key Features
+
+### 1. User Management
+
+**Admin-only feature**
+
+Administrators can:
+- Add new users
+- Edit user information
+- Delete users
+- Manage user permissions
+
+### 2. Spaces
+
+**Admin-only feature**
+
+- Create multiple spaces for project organization
+- Assign users as space owners
+- Facilitate project classification and management
+
+### 3. Project Members
+
+For each project, you can:
+- Add members
+- Edit member roles
+
+#### Member Roles
+
+| Permission | Owner | Master | Developer | Reporter |
+|------------|-------|--------|-----------|----------|
+| View Project | ✓ | ✓ | ✓ | ✓ |
+| Edit Project | ✓ | ✗ | ✗ | ✗ |
+| Manage Project Members | ✓ | ✗ | ✗ | ✗ |
+| Request Deployment | ✓ | ✓ | ✓ | ✗ |
+| Request Rollback | ✓ | ✓ | ✓ | ✗ |
+| Review Deployment Requests | ✓ | ✓ | ✗ | ✗ |
+| Review Rollback Requests | ✓ | ✓ | ✗ | ✗ |
+| Execute Deployment Tasks | ✓ | ✓ | ✓ | ✗ |
+| Execute Rollback Tasks | ✓ | ✓ | ✓ | ✗ |
+| View Deployment Tasks | ✓ | ✓ | ✓ | ✓ |
+
+
+## Getting Started
+
+1. Log in to your CelerBuild Pro account
+2. Navigate to the User Management section to set up your team
+3. Create Spaces to organize your projects
+4. Add members to your projects and assign appropriate roles
+
+
+For detailed instructions on each role and feature, please refer to our comprehensive documentation:
+
+- [Admin Role](for_teams/admin_role)
+- [Space Owner Role](for_teams/space_owner_role)
+- [Project Owner Role](for_teams/project_owner_role)
+- [Project Master Role](for_teams/project_master_role)
+- [Developer Role](for_teams/developer_role)
+- [Reporter Role](for_teams/reporter_role)
+
+<Callout type="warning">
+    Remember to regularly review and update user permissions to maintain project security.
+</Callout>

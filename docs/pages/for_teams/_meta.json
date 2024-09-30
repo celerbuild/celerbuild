@@ -1,0 +1,8 @@
+{
+  "admin_role": "Admin Role",
+  "space_owner_role": "Space Owner Role",
+  "project_owner_role": "Project Owner Role",
+  "project_master_role": "Project Master Role",
+  "developer_role": "Developer Role",
+  "reporter_role": "Reporter Role"
+}

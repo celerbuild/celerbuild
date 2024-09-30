@@ -1,0 +1,15 @@
+## How it works
+
+Celerbuild pulls the project's git repository via SSH, performs build and packaging operations, and then deploys to various clusters via SSH.
+
+## Architecture Diagram
+![celerbuild_arch](https://github.com/user-attachments/assets/fef7313b-9846-445d-a24d-3c69e20c737a)
+
+## SSH
+SSH is used throughout the entire deployment process. It's required for pulling the project's git repository and for deploying to target clusters.
+
+## Roles
+The primary role in this process is the developer, who initiates the deployment request. In the Pro version, which involves team collaboration, additional roles come into play, including project owners and masters.
+
+## Clusters
+Clusters are the basic unit of deployment for Celerbuild. Each cluster must contain at least one server. To add or remove servers, you only need to expand or contract the cluster. This approach ensures that changes to the cluster configuration do not affect the existing projects' cluster selections.

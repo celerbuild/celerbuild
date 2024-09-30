@@ -1,0 +1,44 @@
+Supports deployment on Linux and Mac OS environments. Windows deployment is not supported.
+
+# 1. Install MariaDB
+
+## Install MariaDB on Linux
+On Linux, different distributions have different installation methods:
+
+### Ubuntu/Debian
+
+```shell copy
+sudo apt update
+sudo apt install mariadb-server
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+sudo mysql_secure_installation
+```
+When running the mysql_secure_installation command, follow the prompts for security settings.
+
+### CentOS/RHEL
+
+```shell copy
+sudo yum update
+sudo yum install mariadb-server
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+sudo mysql_secure_installation
+```
+When running the mysql_secure_installation command, follow the prompts for security settings.
+
+## Install MariaDB on Mac OS
+
+On Mac OS, you can use Homebrew to install MariaDB:
+
+```shell copy
+brew update
+brew install mariadb
+brew services start mariadb
+```
+After installation, you can use the mysql_secure_installation command for security settings.
+
+# 2. Deploy Public Key
+
+Copy the ssh id_rsa.pub of the machine where CelerBuild is deployed to the authorized_keys of the remote server's ssh.
+

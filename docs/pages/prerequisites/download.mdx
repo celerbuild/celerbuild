@@ -1,0 +1,42 @@
+The following instructions take celerbuild-0.8.8-darwin-amd64.tar.gz as an example.
+
+# 1. Download
+
+Go to [CelerBuild official website](https://celerbuild.com/download) to download, find the appropriate package download address for your operating system, and then use the command to download.
+
+wget download example:
+
+```shell copy
+wget https://raw.githubusercontent.com/celerbuild/download/refs/heads/main/celerbuild-0.8.8-darwin-amd64.tar.gz
+```
+
+Of course, if you deploy it locally, you can also download it directly from the official website download page by clicking the download button.
+
+# 2. Extract the File
+
+Ensure the file has execute permissions. You can set the permissions using the following command:
+
+```shell copy
+chmod +x celerbuild-0.8.8-darwin-amd64
+```
+
+Run the following command to extract the file:
+
+```shell copy
+tar zxvf celerbuild-0.8.8-darwin-amd64.tar.gz
+```
+After unpacking the file is celerbuild-0.8.8-darwin-amd64
+
+# 3. Run the file
+
+```shell copy
+./celerbuild-0.8.8-darwin-amd64
+```
+
+If there are no errors, it means the execution was successful.
+
+import { Callout } from 'nextra-theme-docs'
+
+<Callout type="info">
+    After installing CelerBuild, the built-in admin user is: `admin`. The default password is: `adminadmin`. Please change the password after logging in.
+</Callout>

@@ -1,0 +1,58 @@
+# Base Module Configuration
+
+Before setting up your project in CelerBuild, it's essential to configure the Base module components: Server Clusters, Servers, and Environments (Envs). This guide will walk you through the process step-by-step.
+
+## 1. Configuring Server Clusters
+
+Server clusters help organize your servers into logical groups, making management easier.
+
+To add a new server cluster:
+
+1. Navigate to the Base Module section
+2. Click on "Server Clusters"
+3. Select "Add New Cluster"
+4. Enter a name for your cluster
+5. Click "Submit" to create the cluster
+
+![Adding a Server Cluster](https://github.com/user-attachments/assets/271a010f-b24e-4c45-aa0f-225326dda8dd)
+
+## 2. Configuring Servers
+
+Once you've set up your server clusters, you can add individual servers to them.
+
+To add a new server:
+
+1. Go to the "Servers" section in the Base Module
+2. Click "Add New Server"
+3. Fill in the following details:
+    - Server Name
+    - Server IP
+    - SSH Port
+4. Select the cluster you want to add this server to
+5. Click "Add Server" to save
+
+![Configuring a Server](https://github.com/user-attachments/assets/e90987a1-bb40-45b4-b393-7ac84c42cc8b)
+
+## 3. Configuring Environments (Envs)
+
+Environments in CelerBuild allow you to manage different deployment stages (e.g., development, staging, production).
+
+> **Note**: CelerBuild comes with pre-configured environments by default. You can use these as-is or modify them to suit your needs.
+
+To modify environments:
+
+1. Navigate to the "Envs" section in the Base Module
+2. Click on an existing environment to edit, or "Add New Environment"
+3. Customize the settings as needed
+4. Save your changes
+
+![Environment Configuration](https://github.com/user-attachments/assets/e4933f9f-b10c-4a32-a0a7-b906f677464f)
+
+## Best Practices
+
+- Use descriptive names for your server clusters and servers
+- Keep your environment configurations consistent across projects
+- Regularly review and update your server configurations
+- Document your custom environment settings for future reference
+
+By properly configuring these base components, you'll set a strong foundation for efficient project management and deployment in CelerBuild.

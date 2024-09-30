@@ -1,0 +1,118 @@
+# Project Configuration in CelerBuild
+
+CelerBuild project configuration consists of two main sections: Basic Settings and Deployment Settings. This guide will walk you through each section to help you set up your project effectively.
+
+## 1. Basic Project Settings
+
+Configure the fundamental aspects of your project:
+
+![Basic Project Settings](https://github.com/user-attachments/assets/a50f187d-5d7d-493f-9af9-e117e5fa7ee8)
+
+1. **Project Name**: Enter a unique, descriptive name.
+
+2. **Environment**: Select the deployment environment (e.g., dev, staging, production).
+
+3. **Space Selection**:
+    - Standard version: Use 'default'
+    - Pro version: Add and select multiple spaces
+
+4. **Git Repository**: Provide the URL of your project's Git repository.
+
+5. **Target Deployment Path**: Specify the server path for project deployment.
+
+6. **Target Deployment Repository Path**: Define the storage location for project packages pre-deployment.
+
+7. **Target Repository Version Retention**: Set the number of project package versions to retain.
+
+8. **Branch/Tag Selection**:
+    - Branch: Specify which branches to use
+    - Tag: Set the number of latest tags to use
+
+> **Note**: Limiting the number of branches or tags improves synchronization efficiency during deployment requests.
+
+9. **Server Cluster**: Choose the deployment server cluster.
+
+
+
+## 2. Project Deployment Settings
+
+After basic configuration, set up deployment specifics:
+
+![Deployment Settings](https://github.com/user-attachments/assets/aca2ea1c-63c2-450c-8632-92811ea170a8)
+
+1. **Deployment User**: Specify the user account for deployment execution. Ensure this user:
+    - Exists on all cluster servers
+    - Has necessary execution permissions
+
+2. **Build Commands**: Enter project build commands. Example:
+
+```shell
+make build && cd build && tar -zcvf ${LOCAL_PACKAGE_FILE} *
+   ```
+This command performs the following actions:
+1. `make build`: Executes the build process defined in your Makefile.
+2. `cd build`: Changes the current directory to the 'build' folder.
+3. `tar -zcvf ${LOCAL_PACKAGE_FILE} *`: Creates a compressed tar archive of all files in the current directory.
+
+> **Important Notes**:
+> - Adjust `make build && cd build` to match your project's specific build process.
+> - The `tar -zcvf ${LOCAL_PACKAGE_FILE} *` command is a required fixed syntax. It must be included at the end of your build command to package local files for deployment.
+> - `${LOCAL_PACKAGE_FILE}` is a built-in variable that CelerBuild uses to identify the package for deployment.
+> - This packaging step is crucial for preparing your files for the subsequent deployment and extraction process.
+
+When defining your build commands, ensure that you include your project-specific build steps followed by the required tar command. This ensures that your project is correctly built and packaged for deployment.
+
+3. **Pre-deployment Commands** (Optional):
+Commands to run before the main deployment process. Refer to the following example using built-in variables.
+
+4. **Post-deployment Commands** (Optional):
+Commands to run after the main deployment process. An example is executing the start script:
+```shell copy
+./start.sh
+   ```
+
+
+
+## Built-in Environment Variables
+
+CelerBuild provides several built-in environment variables for use in your deployment scripts:
+
+- `${LOCAL_PACKAGE_FILE}`: Path to the file generated during packaging
+- `${TARGET_DEPLOYMENT_PATH}`: The specified Target Deployment Path
+- `${TARGET_DEPLOYMENT_PROJECT_NAME}`: Generated project name for target server deployment (related to project ID)
+
+Example using built-in variables:
+
+```shell copy
+: PROJECT_DIR="${TARGET_DEPLOYMENT_PATH}/${TARGET_DEPLOYMENT_PROJECT_NAME}"; [ -d "$PROJECT_DIR" ] && cd "$PROJECT_DIR" && ./stop.sh || echo "Directory $PROJECT_DIR does not exist"
+```
+
+This command demonstrates the use of built-in variables and performs the following actions:
+
+1. Sets the `PROJECT_DIR` variable using `TARGET_DEPLOYMENT_PATH` and `TARGET_DEPLOYMENT_PROJECT_NAME`.
+2. Checks if the directory exists using `[ -d "$PROJECT_DIR" ]`.
+3. If the directory exists:
+    - Changes to the directory (`cd "$PROJECT_DIR"`)
+    - Executes the `stop.sh` script
+4. If the directory doesn't exist:
+    - Prints an error message
+
+This example showcases how to use CelerBuild's built-in variables to create dynamic paths and perform conditional actions during deployment.
+
+## Best Practices
+
+- Use descriptive, unique project names within your organization.
+- Regularly update your Git repository URL if it changes.
+- Optimize build commands for efficiency and reliability.
+- Utilize pre-deployment commands for tasks like database backups or service notifications.
+- Implement post-deployment commands for cache clearing or service restarts.
+- Limit branch/tag numbers in project configuration:
+    - Improves synchronization speed during deployment requests
+    - Specify only actively used branches or recent tags
+    - Regularly clean up old or unused branches and tags
+- Balance deployment options with system performance.
+- Leverage built-in environment variables in your deployment scripts for consistency and ease of maintenance.
+- Test your deployment configuration in a staging environment before applying to production.
+- Document any custom settings or scripts used in your deployment process.
+
+By carefully configuring these settings, you'll ensure a smooth and efficient deployment process with CelerBuild.
