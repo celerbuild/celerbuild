@@ -1,42 +1,56 @@
-The following instructions take celerbuild-0.8.8-darwin-amd64.tar.gz as an example.
+# Download and Install CelerBuild
 
-# 1. Download
+These instructions will guide you through downloading and installing the latest version of CelerBuild.
 
-Go to [CelerBuild official website](https://celerbuild.com/download) to download, find the appropriate package download address for your operating system, and then use the command to download.
+## 1. Download
 
-wget download example:
+First, determine the latest version of CelerBuild by visiting the [CelerBuild official website](https://celerbuild.com/download).
 
-```shell copy
-wget https://raw.githubusercontent.com/celerbuild/download/refs/heads/main/celerbuild-0.8.8-darwin-amd64.tar.gz
-```
+Replace `{VERSION}` in the following commands with the actual latest version number.
 
-Of course, if you deploy it locally, you can also download it directly from the official website download page by clicking the download button.
-
-# 2. Extract the File
-
-Ensure the file has execute permissions. You can set the permissions using the following command:
+### macOS (darwin-amd64)
 
 ```shell copy
-chmod +x celerbuild-0.8.8-darwin-amd64
+curl -O https://raw.githubusercontent.com/celerbuild/download/refs/heads/main/celerbuild-{VERSION}-darwin-amd64.tar.gz
 ```
+
+### Linux (x86_64)
+
+```shell copy
+curl -O https://raw.githubusercontent.com/celerbuild/download/refs/heads/main/celerbuild-{VERSION}-linux-amd64.tar.gz
+```
+
+Alternatively, you can download directly from the official website by clicking the download button for your operating system.
+
+## 2. Extract the File
 
 Run the following command to extract the file:
 
 ```shell copy
-tar zxvf celerbuild-0.8.8-darwin-amd64.tar.gz
+tar zxvf celerbuild-{VERSION}-{OS}-{ARCH}.tar.gz
 ```
-After unpacking the file is celerbuild-0.8.8-darwin-amd64
 
-# 3. Run the file
+Replace `{OS}` with either `darwin` or `linux`, and `{ARCH}` with your system architecture (e.g., `amd64`).
+
+## 3. Set Permissions
+
+Ensure the extracted file has execute permissions:
 
 ```shell copy
-./celerbuild-0.8.8-darwin-amd64
+chmod +x celerbuild-{VERSION}-{OS}-{ARCH}
 ```
 
-If there are no errors, it means the execution was successful.
+## 4. Run CelerBuild
 
-import { Callout } from 'nextra-theme-docs'
+```shell copy
+./celerbuild-{VERSION}-{OS}-{ARCH}
+```
 
-<Callout type="info">
-    After installing CelerBuild, the built-in admin user is: `admin`. The default password is: `adminadmin`. Please change the password after logging in.
-</Callout>
+Note: On first run, CelerBuild will create a default configuration file.
+
+## Next Steps
+
+Before you can start using CelerBuild, you need to set up a database and configure the application. Please refer to the following sections:
+
+1. [Database Configuration](../setup_and_configuration/database_configuration.mdx)
+2. [Remote Sync Setup](../setup_and_configuration/remote_sync_setup.mdx)

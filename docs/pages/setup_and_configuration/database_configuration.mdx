@@ -1,0 +1,59 @@
+# Database Configuration
+
+CelerBuild uses MariaDB as its database. This guide will help you configure the database connection.
+
+## Configuration File Location
+
+The database configuration file is located at:
+
+```
+~/.celerbuild/config/mariadb.yaml
+```
+
+## Default Configuration
+
+By default, the configuration file contains the following settings:
+
+```yaml
+db_user: ""
+db_password: ""
+db_host: 127.0.0.1
+db_port: "3306"
+db_name: celerbuild
+```
+
+## Configuring Your Database Connection
+
+You need to modify these settings to match your MariaDB setup. Here's what each field means:
+
+- `db_user`: Your MariaDB username
+- `db_password`: Your MariaDB password
+- `db_host`: The host where your MariaDB server is running (use `127.0.0.1` for localhost)
+- `db_port`: The port your MariaDB server is listening on (default is 3306)
+- `db_name`: The name of the database for CelerBuild (default is `celerbuild`)
+
+
+## Important Notes
+
+- Ensure that the MariaDB user has the necessary permissions to create, read, update, and delete in the specified database.
+- Use a strong, unique password for your database user.
+- If you're using a remote database, replace `127.0.0.1` with the appropriate hostname or IP address.
+
+## Verifying the Connection
+
+After configuring the database, you can verify the connection by starting CelerBuild. If there are any connection issues, CelerBuild will display an error message with details.
+
+## Troubleshooting
+
+If you encounter any issues connecting to the database:
+
+1. Double-check your configuration settings.
+2. Ensure MariaDB is running and accessible.
+3. Verify that the specified user has the correct permissions.
+4. Check your firewall settings if using a remote database.
+
+## Next Steps
+
+After configuring your database connection, the next important step is to set up Remote Sync. This feature ensures that your CelerBuild instance stays up-to-date and properly activated.
+
+To continue with your setup process, please proceed to the [Remote Sync Setup](../setup_and_configuration/remote_sync_setup.mdx) guide.

@@ -40,5 +40,75 @@ After installation, you can use the mysql_secure_installation command for securi
 
 # 2. Deploy Public Key
 
-Copy the ssh id_rsa.pub of the machine where CelerBuild is deployed to the authorized_keys of the remote server's ssh.
+To enable secure, password-less SSH access between the CelerBuild deployment machine and your remote servers, you need to set up public key authentication. Follow these steps:
 
+1. Generate an SSH key pair (if you haven't already):
+```bash copy
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+```
+Press Enter to accept the default file location and optionally set a passphrase.
+
+2. Display and copy the public key:
+
+```bash copy
+cat ~/.ssh/id_rsa.pub
+```
+Manually select and copy the entire output.
+
+Alternative methods for copying (if needed):
+- On macOS:
+```bash copy
+pbcopy < ~/.ssh/id_rsa.pub
+  ```
+- On Linux with graphical interface:
+```bash copy
+cat ~/.ssh/id_rsa.pub | xclip -selection clipboard
+  ```
+Note: If you encounter the error "Command 'xclip' not found", you can install it using:
+```bash copy
+sudo apt install xclip  # For Ubuntu/Debian
+# or
+sudo yum install xclip  # For CentOS/RHEL
+  ```
+
+3. Add the public key to the remote server:
+
+a. If you have `ssh-copy-id` available:
+```bash copy
+ssh-copy-id user@remote_server
+   ```
+b. If you prefer manual setup or don't have `ssh-copy-id`:
+   - SSH into your remote server:
+```bash copy
+ssh user@remote_server
+     ```
+   - Create the .ssh directory if it doesn't exist and set permissions:
+```bash copy
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+     ```
+   - Open or create the authorized_keys file with vim:
+```bash copy
+vim ~/.ssh/authorized_keys
+     ```
+   - Press 'i' to enter insert mode, then paste the copied public key.
+   - Press 'Esc', then type ':wq' and press Enter to save and exit vim.
+   - Set proper permissions for the authorized_keys file:
+```bash copy
+chmod 600 ~/.ssh/authorized_keys
+     ```
+
+4. Test the connection:
+```bash copy
+ssh user@remote_server
+```
+You should be able to log in without entering a password.
+
+Troubleshooting:
+- If you encounter "Permission denied (publickey)" errors, ensure the permissions on both the local and remote .ssh directories and files are correct.
+- For AWS EC2 instances, you may need to use the .pem file for initial access:
+```bash copy
+ssh -i /path/to/your/key.pem ec2-user@ec2-xx-xx-xx-xx.compute-1.amazonaws.com
+  ```
+
+Note: While RSA keys are sufficient for most uses, Ed25519 keys offer enhanced security. Using a strong passphrase is recommended but optional.

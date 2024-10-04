@@ -1,0 +1,58 @@
+# Remote Sync Setup
+
+Remote Sync is a feature that automatically maintains your CelerBuild activation status. When enabled, it eliminates the need for manual reactivation after your license expires. This guide will walk you through the process of enabling and configuring Remote Sync.
+
+## Prerequisites
+
+- CelerBuild installed and running
+- Database configured (see [Database Configuration](./database_configuration.mdx))
+
+## Accessing the CelerBuild Dashboard
+
+1. Open a web browser and navigate to:
+```
+http://localhost:8666/login
+   ```
+Note: If you've configured a different port, use that instead of 8666.
+
+2. Log in with the default credentials:
+- Username: `admin`
+- Password: `adminadmin`
+
+> **Important:** For security reasons, change the default password immediately after your first login.
+
+## Changing the Default Password
+
+1. After logging in, go to User Settings.
+2. Locate the password change section.
+3. Enter your new password and confirm it.
+4. Save your changes.
+
+## Enabling Remote Sync
+
+1. In the CelerBuild dashboard, navigate to Settings > Subscription.
+2. Find the "Remote Sync" option.
+3. Toggle the switch to enable Remote Sync.
+
+## Configuring Access Keys
+
+1. Visit the [CelerBuild Account Page](https://celerbuild.com/account).
+2. Locate your Access Keys in the account dashboard.
+3. Copy your Access Keys.
+4. Return to the CelerBuild dashboard.
+5. In the Remote Sync settings, paste your Access Keys into the designated field.
+6. Save your changes.
+
+## Verifying Remote Sync
+
+After configuring Remote Sync:
+
+1. Check the Remote Sync status in the dashboard.
+2. Ensure it shows as "Connected" or "Active".
+
+## Next Steps
+
+With Remote Sync configured, you've ensured continuous activation for your CelerBuild instance. To learn more about CelerBuild's features, explore our User Guides:
+
+- [For Individuals](../for_individuals.mdx)
+- [For Teams](../for_teams.mdx)
