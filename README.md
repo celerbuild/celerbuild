@@ -1,5 +1,5 @@
 ## Introduction
-CelerBuild is a simple, self-hosted deployment system for individuals and teams.
+CelerBuild is a lightweight, self-hosted deployment system for individuals and teams.
 
 ## Features
 * Self-hosted for Complete Control and Flexibility
