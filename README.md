@@ -6,6 +6,10 @@ CelerBuild is a lightweight, self-hosted deployment system for individuals and t
   - Data storage in your own configured database
   - Flexible deployment on local machine or server
   - Full control over system updates and maintenance
+* Advanced Space Management
+  - Isolate environments for different teams or business units to enhance security
+  - Manage members and permissions with role-based access control
+  - Centralize project and resource management within each space for efficient operations
 * Unlimited Project Management
   - Comprehensive project and environment configuration
   - Customizable deployment settings
