@@ -1,0 +1,443 @@
+# Deploying PHP Projects with CelerBuild Using the Symfony Framework Example
+
+This guide demonstrates how to deploy a PHP project using CelerBuild Standard Version, including:
+- Branch deployment for development environment
+- Tag deployment for production environment
+- Tag version rollback operations
+
+We'll use the [celerbuild-example-php](https://github.com/celerbuild/celerbuild-example-php) project built with the Symfony framework.
+
+> **Note**:
+> - This tutorial uses the Standard Version with the admin user
+> - For Pro Version features with multiple roles and approval process, please refer to the [Pro Version Guide](/deployment-examples/php-projects/symfony-framework-pro)
+
+## Prerequisites
+
+### 1. System Prerequisites
+Complete all [Prerequisites](/prerequisites) setup steps
+
+### 2. PHP Environment Setup
+
+#### Installing PHP and PHP-FPM
+
+##### macOS
+```bash
+# Using Homebrew
+brew install php
+
+# Verify installation
+php -v
+```
+
+##### Ubuntu/Debian
+```bash
+# Update package list
+sudo apt update
+
+# Install PHP and PHP-FPM
+sudo apt install php php-fpm
+
+# Verify installation
+php -v
+```
+
+##### CentOS/RHEL
+```bash
+# Install EPEL repository
+sudo yum install epel-release
+
+# Install PHP and PHP-FPM
+sudo yum install php php-fpm
+
+# Verify installation
+php -v
+```
+
+> **Note**:
+> - PHP and PHP-FPM should be installed on both the CelerBuild machine and the deployment machine.
+
+### 3. Composer Setup
+
+#### Installing Composer
+
+##### macOS, Ubuntu/Debian, CentOS/RHEL
+```bash
+# Download the installer
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+
+# Install Composer globally
+php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+
+# Remove the installer
+php -r "unlink('composer-setup.php');"
+
+# Verify installation
+composer -v
+```
+
+> **Note**:
+> - Composer should be installed on the CelerBuild machine for managing PHP dependencies.
+
+### 4. Web Server Setup
+
+#### Installing Nginx
+
+##### Ubuntu/Debian
+```bash
+# Update package list
+sudo apt update
+
+# Install Nginx
+sudo apt install nginx
+
+# Start Nginx
+sudo systemctl start nginx
+
+# Enable Nginx to start on boot
+sudo systemctl enable nginx
+
+# Verify installation
+nginx -v
+```
+
+##### CentOS/RHEL
+```bash
+# Install Nginx
+sudo yum install nginx
+
+# Start Nginx
+sudo systemctl start nginx
+
+# Enable Nginx to start on boot
+sudo systemctl enable nginx
+
+# Verify installation
+nginx -v
+```
+
+#### Nginx Configuration
+1. Create Site Configuration File:
+
+Create a new configuration file named `my_php_project` in `/etc/nginx/sites-available/`:
+
+```bash
+   server {
+       listen 8081;
+       server_name your_server_ip_or_domain;
+
+       root /home/ubuntu/celerbuild-example-php/public;
+       index index.php index.html index.htm;
+
+       location / {
+           try_files $uri $uri/ /index.php?$query_string;
+       }
+
+       location ~ \.php$ {
+           include snippets/fastcgi-php.conf;
+           fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+           fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+           include fastcgi_params;
+       }
+
+       location ~ /\.ht {
+           deny all;
+       }
+   }
+```
+2. Enable Site Configuration
+
+Create a symbolic link to sites-enabled:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/my_php_project /etc/nginx/sites-enabled/
+```
+
+3. Test and Restart Nginx
+
+Test the configuration for syntax errors and restart Nginx:
+
+```bash
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+These steps will help you configure Nginx to serve your PHP Symfony application.
+
+> **Note**:
+> - Nginx should be installed on the deployment machine, typically a Linux server, to serve the PHP Symfony application.
+> - Ensure Nginx is configured to work with PHP-FPM for handling PHP requests.
+
+### 5. Additional Permissions
+
+Before setting permissions, ensure that your project is created under the current user. In this example, the project `celerbuild-example-php` is created under the `ubuntu` user. You can adjust this according to your actual setup.
+
+```bash
+# Allow others to access the home directory
+sudo chmod o+x /home/ubuntu
+
+# Allow others to access the project directory
+sudo chmod o+x /home/ubuntu/celerbuild-example-php
+
+# Add www-data to the ubuntu group to allow Nginx access
+sudo usermod -aG ubuntu www-data
+```
+
+## Branch Deployment
+
+### 1. Create Server Infrastructure
+
+#### Create Server Cluster
+- Navigate to `Global/Server Clusters`
+- Create a cluster named "example-php-server-cluster(dev)"
+
+![php-example-create-server-cluster](https://github.com/user-attachments/assets/18dd4536-3a9e-4324-b297-9b1ef717178f)
+
+#### Add Server
+- Navigate to the `Global/Servers` section or go to the `Actions` menu of the newly created `example-php-server-cluster(dev)` and select "Servers"
+- Select cluster "example-php-server-cluster(dev)"
+- Fill in:
+  - Server Name
+  - Server IP
+  - SSH Port (default: 22)
+
+![example-php-add-server](https://github.com/user-attachments/assets/6f394b2c-4582-46c2-bde0-1258822a123b)
+
+### 2. Import Project Template
+
+#### Download Template
+- Download project template: celerbuild-example-php-dev.yaml
+- Template source: [celerbuild-example-php dev template](https://github.com/celerbuild/celerbuild-example-php/blob/main/project-template/celerbuild-example-php-dev.yaml)
+
+![image](https://github.com/user-attachments/assets/4c3173be-163b-4b71-b802-96a9194646f9)
+
+#### Import Template
+- Navigate to `Projects/Projects`
+- Click "Import YAML"
+- Upload the downloaded template
+
+![php-example-project-import-yaml](https://github.com/user-attachments/assets/80fe0a0f-0b07-4bcb-9e03-fbf7bc09136a)
+
+#### Create Project
+- Review and confirm project settings
+- Click "Create Project" to finish
+
+> Note: This example uses Ubuntu system with `ubuntu` user. Please adjust the Deployment Configuration (Target Deployment Path, Target Repository Path, Deployment User, etc.) according to your actual environment.
+
+![celerbuild-example-php-dev-import-1](https://github.com/user-attachments/assets/40990f07-3fe7-4bd9-b513-959e50b025ce)
+
+![celerbuild-example-php-dev-import-2](https://github.com/user-attachments/assets/afa09bf1-2dfa-4e65-9817-c5018f38dda5)
+
+### 3. Initiating Deployment
+1. Go to `Operations/Applications`
+2. Select project "celerbuild-example-php-dev"
+3. Fill in Title and Description
+4. Click sync icon next to "Branch" and select latest dev branch
+5. Click "Submit Application"
+
+![php-apply-deploy-part-1](https://github.com/user-attachments/assets/eec73c70-0eea-4795-9658-c46c0426d71c)
+
+![php-apply-deploy-part-2](https://github.com/user-attachments/assets/a28bfc45-a3e0-4a86-bdaf-d701d796411e)
+
+For detailed steps, see [Creating Deployment](/user-guide/creating-deployment)
+
+### 4. Executing Deployment
+1. In `Operations/Tasks`, find your project task
+2. Click "Deploy" button
+3. On the task page, click "Start Deploy"
+4. Monitor Server Status and Operation Logs
+5. If issues occur, check error messages and retry deployment after fixing
+
+![php-example-task-1](https://github.com/user-attachments/assets/2d399f97-c088-4a1c-99c0-bd4bdd191236)
+
+![php-example-task-2](https://github.com/user-attachments/assets/f45b4961-93a6-473c-803e-4367e24a4c11)
+
+![php-example-task-3](https://github.com/user-attachments/assets/3bd1c8f2-34ff-4c9c-a622-3c9dc6dbabc8)
+
+### 5. Verification
+Access `http://server:8081/version` (replace "server" with your server address)
+
+```bash
+# Example command
+➜  ~ curl http://server:8081/version
+
+# Expected response
+{"version":"1.0.3"}
+```
+
+> **Note**:
+> - Replace "server" with your actual server IP address
+> - A response similar to `{"version":"1.0.3"}` indicates successful deployment
+> - If you cannot access the endpoint, check:
+>   - Server firewall settings
+>   - Port 8081 accessibility
+>   - Application running status
+
+## Tag Deployment
+
+
+### 1. Create Server Infrastructure
+
+#### Create Server Cluster
+- Navigate to `Global/Server Clusters`
+- Create a cluster named "example-php-server-cluster(prod)"
+
+![php-example-tag-new-server-cluster](https://github.com/user-attachments/assets/6c474b00-3239-4bd3-93e5-f11a80380dde)
+
+
+#### Add Server
+- Navigate to the `Global/Servers` section or go to the `Actions` menu of the newly created `example-php-server-cluster(prod)` and select "Servers"
+
+- Select cluster "example-php-server-cluster(prod)"
+- Fill in:
+  - Server Name
+  - Server IP
+  - SSH Port (default: 22)
+
+![php-tag-add-server](https://github.com/user-attachments/assets/04947f2a-75b8-4621-ac4a-20d05ee95881)
+
+
+### 2. Import Project Template
+
+#### Download Template
+- Download project template: celerbuild-example-php-prod.yaml
+- Template source: [celerbuild-example-php prod template](https://github.com/celerbuild/celerbuild-example-php/blob/main/project-template/celerbuild-example-php-prod.yaml)
+
+![celerbuild-php-project-template](https://github.com/user-attachments/assets/93f2cf54-b095-4c5b-b178-6f1ab432e960)
+
+#### Import Template
+- Navigate to `Projects/Projects`
+- Click "Import YAML"
+- Upload the downloaded template
+
+![php-tag-deploy-import-1](https://github.com/user-attachments/assets/af48d921-d7b9-4567-9c84-ff5a560cb8e1)
+
+#### Create Project
+- Review and confirm project settings
+- Click "Create Project" to finish
+
+![php-tag-deploy-import-2](https://github.com/user-attachments/assets/16a5b769-f07a-4a46-9ec3-d6f1e83c6e35)
+
+![php-tag-deploy-import-3](https://github.com/user-attachments/assets/01b877a7-a52b-48a8-a0d3-ba8f8a97ea51)
+
+### 3. Initiating Deployment
+1. Go to `Operations/Applications`
+2. Select project "celerbuild-example-php-prod" and Click "Apply Deploy"
+3. Fill in Title and Description
+4. Click sync icon next to "Tag" and select latest tag
+5. Click "Submit Application"
+
+![php-tag-apply-deploy-1](https://github.com/user-attachments/assets/e7f3e23d-3056-4d9f-8417-903b0af25085)
+
+![php-tag-apply-deploy-2](https://github.com/user-attachments/assets/f87a007e-3d10-43de-910a-e350e9b817df)
+
+For detailed steps, see [Creating Deployment](/user-guide/creating-deployment)
+
+### 4. Executing Deployment
+Follow the same steps as branch deployment execution.
+
+![php-tag-apply-deploy-3](https://github.com/user-attachments/assets/8c84980c-4ae7-462f-94f9-35af6b9308ef)
+
+![php-tag-apply-deploy-5](https://github.com/user-attachments/assets/a5d429ad-54f7-46c9-8438-f23339ecfecf)
+
+### 5. Verification
+Access `http://server:8081/version` (replace "server" with your server address)
+
+```bash
+# Example command
+➜  ~ curl http://server:8081/version
+
+# Expected response
+{"version":"1.0.1"}
+```
+> **Note**:
+> - Replace "server" with your actual server IP address
+> - A response similar to `{"version":"1.0.1"}` indicates successful deployment
+> - If you cannot access the endpoint, check:
+>   - Server firewall settings
+>   - Port 8081 accessibility
+>   - Application running status
+
+## Rollback Operations
+
+> **Note**: Branch deployment rollback is not demonstrated here because the system only maintains the latest committed version. We'll demonstrate rollback using tag deployments instead.
+
+### Tag Deployment Rollback Example
+
+#### 1. Initial Deployment (v1.0.3)
+> For detailed deployment steps, refer to:
+
+> For detailed deployment steps, refer to:
+> - [Initiating Deployment](/deployment-examples/php-projects/symfony-framework#3-initiating-deployment-1)
+> - [Executing Deployment](/deployment-examples/php-projects/symfony-framework#4-executing-deployment-1)
+
+1. Go to `Operations/Applications`
+2. Select project "celerbuild-example-php-prod"
+3. Fill in deployment information:
+  - Title: "Deploy v1.0.3"
+  - Description: "Initial deployment of v1.0.3"
+4. Click sync icon next to "Tag" and select "v1.0.3"
+5. Click "Submit Application"
+6. Execute deployment and verify:
+```bash
+curl http://server:8081/version
+{"version":"1.0.3"}
+
+```
+
+#### 2. Upgrade to v1.0.4
+
+> For detailed deployment steps, refer to:
+
+> - [Initiating Deployment](/deployment-examples/php-projects/symfony-framework#3-initiating-deployment-1)
+> - [Executing Deployment](/deployment-examples/php-projects/symfony-framework#4-executing-deployment-1)
+
+1. Go to `Operations/Applications`
+2. Create new deployment
+3. Fill in deployment information:
+     - Title: "Upgrade to v1.0.4"
+     - Description: "Upgrading from v1.0.3 to v1.0.4"
+4. Select tag "v1.0.4"
+5. Submit and execute deployment
+6. Verify upgrade:
+```bash
+curl http://server:8081/version
+{"version":"1.0.4"}
+```
+
+#### 3. Rollback to v1.0.3
+1. In `Operations/Applications`, find your project
+2. Click Actions (three dots) and select "Apply Rollback"
+3. Fill in rollback information:
+      - Title: "Rollback to v1.0.3"
+      - Description: "Rolling back from v1.0.4 to v1.0.3"
+4. Click sync icon next to "Select Rollback Tag"
+5. Select "v1.0.3" from the available tags
+6. Click "Submit Rollback"
+
+![php-apply-rollback](https://github.com/user-attachments/assets/8e2e0d46-ac33-4df4-83fb-f66b5b6bc579)
+
+![php-rollback-apply-2](https://github.com/user-attachments/assets/ff8785cb-5fd3-4aa7-81ec-83c0feb3c8f1)
+
+#### 4. Execute Rollback
+1. Go to `Operations/Tasks`
+2. Find your rollback task
+3. Click "Rollback" in Actions
+4. Click "Start Rollback" on the task page
+5. Monitor Server Status and Operation Logs
+6. Verify rollback success:
+```bash
+curl http://server:8081/version
+{"version":"1.0.3"}
+```
+
+![php-rollback-task-1](https://github.com/user-attachments/assets/44193622-6d78-4ed5-a8af-77a633cd18cb)
+
+![php-rollback-task-2](https://github.com/user-attachments/assets/700f7e78-941d-4aca-876e-8306afd3c5d8)
+
+![php-rollback-task-3](https://github.com/user-attachments/assets/27b76505-33c9-42fc-8927-7de5d495fbfd)
+
+For detailed rollback instructions, see:
+- [Rollback Deployment](/user-guide/rollback-deployment#initiating-a-rollback)
+- [Execute Deployment Task](/user-guide/execute-deployment-task)
+
+Congratulations! You have successfully learned how to deploy Symfony Framework using CelerBuild Standard Edition, including branch deployment, tag deployment, and tag version rollback operations! 🎉

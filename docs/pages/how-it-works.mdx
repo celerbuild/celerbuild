@@ -1,0 +1,71 @@
+## How it works
+
+Celerbuild's workflow is divided into two main phases: BUILD and DEPLOY. The entire process is managed through PROJECT CONFIG.
+
+## Architecture Diagram
+![celerbuild_arch](https://github.com/user-attachments/assets/17fdbf6c-8ade-44a0-8ad8-b5c968592e5a)
+
+## BUILD Phase
+
+The BUILD phase is responsible for code retrieval and building, consisting of the following steps:
+
+### PULL
+
+Pulls source code from the project's git repository via SSH
+Repository URL and branch information are determined by git configuration in PROJECT CONFIG
+Supports major code hosting platforms (GitHub, GitLab, Bitbucket, etc.)
+
+### BUILD
+
+Executes project build commands
+Build commands are configured in PROJECT CONFIG
+Supports various build tools and frameworks (npm, maven, gradle, etc.)
+Generates deployment artifacts
+
+## DEPLOY Phase
+
+The DEPLOY phase handles deploying build artifacts to target servers, including these steps:
+
+### PRE-TASKS
+
+Pre-deployment tasks
+Executes preparation work on target servers before deployment
+Configurable multiple pre-task commands
+Examples: stopping services, backing up data
+
+### DISTRIBUTE
+
+Distributes build artifacts to target server clusters
+Transfers files via SSH
+Supports parallel distribution to multiple servers
+Target server information configured in PROJECT CONFIG
+
+### POST-TASKS
+
+ost-deployment tasks
+Executes after file distribution is complete
+Configurable multiple post-task commands
+Examples: starting services, cleaning temporary files
+
+## Clusters
+
+Clusters are the basic deployment unit in Celerbuild
+Each cluster contains at least one server
+Flexible scaling of servers within clusters
+Cluster configuration changes don't affect existing project cluster selections
+
+## PROJECT CONFIG
+
+PROJECT CONFIG spans the entire deployment process, including:
+* Git repository configuration
+* Build command configuration
+* Deployment task configuration
+* Target cluster configuration
+
+## SSH Security
+
+SSH is fundamental to CelerBuild's secure deployment process:
+- Secure code retrieval from Git repositories
+- Encrypted connections to target servers
+- Secure file transfers
+- Secure remote command execution

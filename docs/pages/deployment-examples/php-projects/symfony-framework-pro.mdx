@@ -1,0 +1,691 @@
+# Deploying PHP Projects with CelerBuild Pro Using the Symfony Framework Example
+
+This guide demonstrates how to deploy a PHP project using CelerBuild Pro Version, covering branch deployment, tag deployment, and tag version rollback operations with multiple roles. We'll use the [celerbuild-example-php](https://github.com/celerbuild/celerbuild-example-php) project built with the Symfony framework.
+
+> **Note**
+> This tutorial uses the Pro Version. For Standard Version features, please refer to the [Standard Version Guide](/deployment-examples/php-projects/symfony-framework).
+
+## Prerequisites
+
+### 1. System Prerequisites
+Complete all [Prerequisites](/prerequisites) setup steps
+
+
+### 2. PHP Environment Setup
+
+#### Installing PHP and PHP-FPM
+
+##### macOS
+```bash
+# Using Homebrew
+brew install php
+
+# Verify installation
+php -v
+```
+
+##### Ubuntu/Debian
+```bash
+# Update package list
+sudo apt update
+
+# Install PHP and PHP-FPM
+sudo apt install php php-fpm
+
+# Verify installation
+php -v
+```
+
+##### CentOS/RHEL
+```bash
+# Install EPEL repository
+sudo yum install epel-release
+
+# Install PHP and PHP-FPM
+sudo yum install php php-fpm
+
+# Verify installation
+php -v
+```
+
+> **Note**:
+> - PHP and PHP-FPM should be installed on both the CelerBuild machine and the deployment machine.
+
+### 3. Composer Setup
+
+#### Installing Composer
+
+##### macOS, Ubuntu/Debian, CentOS/RHEL
+```bash
+# Download the installer
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+
+# Install Composer globally
+php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+
+# Remove the installer
+php -r "unlink('composer-setup.php');"
+
+# Verify installation
+composer -v
+```
+
+> **Note**:
+> - Composer should be installed on the CelerBuild machine for managing PHP dependencies.
+
+### 4. Web Server Setup
+
+#### Installing Nginx
+
+##### Ubuntu/Debian
+```bash
+# Update package list
+sudo apt update
+
+# Install Nginx
+sudo apt install nginx
+
+# Start Nginx
+sudo systemctl start nginx
+
+# Enable Nginx to start on boot
+sudo systemctl enable nginx
+
+# Verify installation
+nginx -v
+```
+
+##### CentOS/RHEL
+```bash
+# Install Nginx
+sudo yum install nginx
+
+# Start Nginx
+sudo systemctl start nginx
+
+# Enable Nginx to start on boot
+sudo systemctl enable nginx
+
+# Verify installation
+nginx -v
+```
+
+#### Nginx Configuration
+1. Create Site Configuration File:
+
+Create a new configuration file named `my_php_project` in `/etc/nginx/sites-available/`:
+
+```bash
+   server {
+       listen 8081;
+       server_name your_server_ip_or_domain;
+
+       root /home/ubuntu/celerbuild-example-php/public;
+       index index.php index.html index.htm;
+
+       location / {
+           try_files $uri $uri/ /index.php?$query_string;
+       }
+
+       location ~ \.php$ {
+           include snippets/fastcgi-php.conf;
+           fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+           fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+           include fastcgi_params;
+       }
+
+       location ~ /\.ht {
+           deny all;
+       }
+   }
+```
+2. Enable Site Configuration
+
+Create a symbolic link to sites-enabled:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/my_php_project /etc/nginx/sites-enabled/
+```
+
+3. Test and Restart Nginx
+
+Test the configuration for syntax errors and restart Nginx:
+
+```bash
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+These steps will help you configure Nginx to serve your PHP Symfony application.
+
+> **Note**:
+> - Nginx should be installed on the deployment machine, typically a Linux server, to serve the PHP Symfony application.
+> - Ensure Nginx is configured to work with PHP-FPM for handling PHP requests.
+
+### 5. Additional Permissions
+
+Before setting permissions, ensure that your project is created under the current user. In this example, the project `celerbuild-example-php` is created under the `ubuntu` user. You can adjust this according to your actual setup.
+
+```bash
+# Allow others to access the home directory
+sudo chmod o+x /home/ubuntu
+
+# Allow others to access the project directory
+sudo chmod o+x /home/ubuntu/celerbuild-example-php
+
+# Add www-data to the ubuntu group to allow Nginx access
+sudo usermod -aG ubuntu www-data
+```
+
+## Role Setup and Permissions
+
+### 1. Team Structure
+- Leader (Tom): Admin + Space Owner + Project Owner
+  - Username: tom
+  - Email: tom@example.com
+
+- Developer A (Jerry): Project Master
+  - Username: jerry
+  - Email: jerry@example.com
+
+- Developer B (Bob): Developer
+  - Username: bob
+  - Email: bob@example.com
+
+### 2. Initial Setup Process (by Tom)
+
+#### 2.1 Create Users
+1. Navigate to `Base/Users`
+2. Create team members' accounts:
+```
+Create Jerry's account:
+- Username: jerry
+- Email: jerry@example.com
+
+Create Bob's account:
+- Username: bob
+- Email: bob@example.com
+   ```
+
+> **Note**:
+> - By default, there is an admin user
+> - You can promote yourself (Tom) to admin and then delete the default admin user
+> - At least one admin user must exist in the system at all times
+
+![create-user-1](https://github.com/user-attachments/assets/9216f24f-ff3b-4be2-a9e6-b29a23d4a0d8)
+
+![create-user-2](https://github.com/user-attachments/assets/d885eea8-968d-464f-a088-191afb6cfa5c)
+
+#### 2.2 Create Space
+1. Navigate to `Global/Spaces`
+2. Create new space:
+    - Name: php-example-space
+
+![php-example-space](https://github.com/user-attachments/assets/48cd1043-437a-48c2-9330-2c2af959e404)
+
+#### 2.3 Import Space Members
+
+Import members from the global user pool to ensure team members have access and can collaborate.
+
+1. Locate the space you just added.
+2. In the corresponding Actions menu, find and click the **Members** button.
+3. Click on **Import Members** to proceed with the import.
+
+![php-example-import-memers-1](https://github.com/user-attachments/assets/c56e4703-aa5e-4fc5-bc48-f390c43028cf)
+
+![php-example-import-memers-2](https://github.com/user-attachments/assets/9f2ca5a2-5712-4f6a-a51a-08c152374fee)
+
+![php-example-import-memers-3](https://github.com/user-attachments/assets/1356facf-2ce3-42f7-b070-13827105483d)
+
+![php-example-import-memers-4](https://github.com/user-attachments/assets/544cbe14-810b-44d1-9d21-9ffc9a1167bc)
+
+#### 2.4 Set Space Owner
+
+Designate a member as the space owner, responsible for managing resources and permissions within the space.
+In this example, set Tom as the Space Owner.
+
+1. Locate the user named Tom.
+2. In the corresponding Actions menu, click **Edit**.
+3. Change his permissions to **Owner**.
+
+![php-example-import-members-5](https://github.com/user-attachments/assets/bfa9facd-313f-43fa-ac12-8ee3f28c40b8)
+
+![php-example-import-members-6](https://github.com/user-attachments/assets/b106ad05-ccbb-4563-b16c-cd5cd6fc27f2)
+
+
+### 3. Create Server Infrastructure
+
+#### 3.1 Create Server Clusters
+1. Navigate to `Global/Server Clusters`
+2. Create development cluster:
+     - Click "New"
+     - Fill in cluster details:
+          - Name: pro-example-php-server-cluster(dev)
+          - Select Environment: dev
+          - Select Status: Available
+     - Click "Create"
+
+![pro-example-php-dev-server-cluster-1](https://github.com/user-attachments/assets/b851e30a-b8bc-4e82-a309-2f7164402260)
+
+3. Create production cluster:
+  - Click "New"
+  - Fill in cluster details:
+       - Name: pro-example-php-server-cluster(prod)
+       - Select Environment: prod
+       - Select Status: Available
+  - Click "Create"
+
+![pro-example-php-prod-server-cluster-1](https://github.com/user-attachments/assets/a75e4f8c-9479-481e-955f-bb2fea6d17a9)
+
+
+#### 3.2 Add Servers
+1. Navigate to `Global/Servers`
+2. Add development server:
+ - Click "New"
+ - Fill in server details:
+       - Select cluster: pro-example-php-server-cluster(dev)
+       - Server Name: pro-php-dev-server-1
+       - Server IP: Your server IP
+       - SSH Port: Your SSH port (default: 22)
+ - Click "Create"
+
+![pro-php-add-dev-server-1](https://github.com/user-attachments/assets/144d0b4a-4acb-4b70-91e6-a338db2ebfdd)
+
+3. Add production server:
+ - Click "New"
+ - Fill in server details:
+      - Select cluster: pro-example-php-server-cluster(prod)
+      - Server Name: pro-php-prod-server-1
+      - Server IP: Your server IP
+      - SSH Port: Your SSH port (default: 22)
+ - Click "Create"
+
+![pro-php-add-prod-server-1](https://github.com/user-attachments/assets/571b35d0-c72d-4cb1-9671-09aefd2e8526)
+
+> **Note**:
+> - Server names are prefixed with "pro-" to distinguish from standard version
+> - Ensure SSH access is properly configured for each server
+> - Multiple servers can be added to each cluster if needed
+
+
+#### 3.3 Import Space Server Clusters
+
+1. Locate the left navigation and select `Space Resources`, then choose `Server Cluster`.
+2. Switch to the space you created earlier, `php-example-space`.
+3. Click the "Import Server Clusters" button and select the existing server cluster from Global to import.
+
+Once imported, the space server cluster can be used as a selectable server cluster list for projects within the current space.
+
+![pro-php-import-server-cluster-1](https://github.com/user-attachments/assets/f820f45b-31ed-4085-9059-af81edefeda3)
+
+![pro-php-import-server-cluster-2](https://github.com/user-attachments/assets/9d2d27cf-359f-406a-aea4-6bf725ddf620)
+
+![pro-php-import-server-cluster-3](https://github.com/user-attachments/assets/d752d991-2dd7-4717-b044-b5b8349ac074)
+
+### 4. Create Projects and Import Project Members
+
+#### 4.1 Development Project
+
+##### Download Template
+- Download project template: celerbuild-example-php-dev.yaml
+- Template source: [celerbuild-example-php dev template](https://github.com/celerbuild/celerbuild-example-php/blob/main/project-template/celerbuild-example-php-dev.yaml)
+
+![image](https://github.com/user-attachments/assets/4c3173be-163b-4b71-b802-96a9194646f9)
+
+##### Import Template
+The imported project name, Space, and server cluster need to be changed, and others need to be modified according to your own requirements
+
+1. Navigate to `Projects/Projects`
+2. Click "Import YAML"
+3. Upload the downloaded template
+4. Configure development project:
+      - Project name: "pro-celerbuild-example-php-dev"
+      - Select cluster: "pro-example-php-server-cluster(dev)"
+      - The development environment can choose not to enable deployment approval (It is off by default)
+5. Click "Create Project"
+
+![php-example-import-yaml-1](https://github.com/user-attachments/assets/0b41bf5d-d4a5-4b40-9602-3cb081c5b91f)
+
+![php-example-import-yaml-2](https://github.com/user-attachments/assets/7dbccc56-010c-4153-9677-457db92ba1a7)
+
+![php-example-import-yaml-3](https://github.com/user-attachments/assets/20d8a819-cb7d-44ef-a83a-32555457f30f)
+
+##### Import Project Members
+1. In the newly created project, find `Members` under the `Actions` menu and click to import project members.
+2. Click "Import Members" to add project members.
+3. After importing, assign specific roles to the members:
+     - Set Tom as the Project Owner
+     - Set Jerry as the Project Master
+     - Set Bob as the Developer
+
+![php-import-project-members-1](https://github.com/user-attachments/assets/f5ffd06c-2225-42c7-b463-bd1a42f5a001)
+
+![php-import-project-members-2](https://github.com/user-attachments/assets/b4497d52-f73a-41ef-8bc6-8248b219267c)
+
+![php-import-project-members-3](https://github.com/user-attachments/assets/5d2cec2c-b02f-4eb7-9da2-7dc6d939dbca)
+
+![php-import-project-members-4](https://github.com/user-attachments/assets/adc43d82-8fbf-45b5-8980-14136919a02f)
+
+![php-import-project-members-5](https://github.com/user-attachments/assets/29330dd4-9c83-4f9f-8f86-67a71471031f)
+
+![php-import-project-members-6](https://github.com/user-attachments/assets/14e187a0-ffba-4e47-b4f2-78fe264c29c8)
+
+#### 4.2 Production Project
+
+##### Download Template
+
+- Download project template: celerbuild-example-php-prod.yaml
+- Template source: [celerbuild-example-php prod template](https://github.com/celerbuild/celerbuild-example-php/blob/main/project-template/celerbuild-example-php-prod.yaml)
+
+![celerbuild-php-project-template](https://github.com/user-attachments/assets/93f2cf54-b095-4c5b-b178-6f1ab432e960)
+
+##### Import Template
+The imported project name and server cluster need to be changed, and others need to be modified according to your own requirements
+
+1. Navigate to `Projects/Projects`
+2. Click "Import YAML"
+3. Upload the downloaded template
+4. Configure production project:
+    - Project name: "pro-celerbuild-example-php-prod"
+    - Select cluster: "pro-example-php-server-cluster(prod)"
+5. Click "Create Project"
+6. Enable deployment approval requirement
+
+![pro-php-example-import-yaml-1](https://github.com/user-attachments/assets/531d08aa-ac95-45dd-911e-cfb80c7cafde)
+
+![pro-php-example-import-yaml-2](https://github.com/user-attachments/assets/7c3ddf74-9acc-4c23-a6df-e63591aa256d)
+
+
+##### Import Project Members
+1. In the newly created project, find `Members` under the `Actions` menu and click to import project members.
+2. Click "Import Members" to add project members.
+3. After importing, assign specific roles to the members:
+      - Set Tom as the Project Owner
+      - Set Jerry as the Project Master
+      - Set Bob as the Developer
+
+![php-pro-import-members-1](https://github.com/user-attachments/assets/cf57900f-764d-4c08-94b9-9a9fb6f86f25)
+
+![php-pro-import-members-2](https://github.com/user-attachments/assets/395d84b4-9269-4d17-b09a-ba9655d6f85a)
+
+![php-pro-import-members-3](https://github.com/user-attachments/assets/9b5f30a7-5510-4783-85d9-63e3107568ca)
+
+![php-pro-import-members-4](https://github.com/user-attachments/assets/25998e37-3044-40cb-bebe-bd2ef989b519)
+
+![php-pro-import-members-5](https://github.com/user-attachments/assets/c2ea7ab0-46ec-4367-b0be-512d89ad0be9)
+
+![php-pro-import-members-6](https://github.com/user-attachments/assets/183507d4-9665-42e4-a46c-e742c486929e)
+
+
+> **Note**:
+> - Development project allows direct deployment without approval
+> - Production project requires approval from Project Owner (Tom) or Project Master (Jerry)
+> - Project templates can be found in the [example repository](https://github.com/celerbuild/celerbuild-example-php/tree/main/project-template)
+> - Make sure to review project settings before creation
+
+## Deployment Workflows
+
+### Development Environment
+> Note: Development environment deployments don't require approval
+
+#### Developer Role (Developer A or B)
+1. Create deployment application
+2. Execute deployment directly
+3. Monitor deployment status
+
+### Production Environment
+
+#### 1. Regular Deployment
+
+Developer Role (Developer A or B):
+- Create deployment application
+- Fill in deployment details
+- Submit for review
+- Execute approved deployment after review
+- Monitor deployment process
+
+Project Owner/Master Role (Leader/Developer A):
+- Review deployment application
+- Approve/Reject with comments
+- Monitor deployment status
+
+#### 2. Rollback Deployment
+Developer Role (Developer A or B):
+- Create rollback application
+- Select version to rollback
+- Submit for review
+- Execute approved rollback after review
+- Monitor rollback process
+
+Project Owner/Master Role (Leader/Developer A):
+- Review rollback application
+- Approve/Reject with comments
+- Monitor rollback status
+
+> **Note**:
+> - The developer who creates the deployment/rollback application is responsible for executing it after approval
+> - Project Owner/Master can review and approve but typically don't execute the deployment/rollback
+> - This workflow ensures that the developer who initiated the change is also responsible for its execution
+
+## Example Deployment Scenarios
+
+### Scenario 1: Development Branch Deployment
+1. Developer B (Bob) creates deployment for dev environment:
+
+Navigate to `Operations/Applications`
+    - Select the space `php-example-space`.
+    - Select project "pro-celerbuild-example-php-dev"
+- Fill in:
+    - Title: "Deploy version update to Dev"
+    - Description: "Deploy version update to Dev.Branch: dev"
+    - Select dev branch (click the branch sync icon, and select the latest version)
+- Click "Submit Application"
+
+![pro-example-php-dev-apply-1](https://github.com/user-attachments/assets/d88746ae-3876-4543-8413-a721173b9c79)
+
+![pro-example-php-dev-apply-2](https://github.com/user-attachments/assets/a7e46e81-dc7f-4ead-82eb-c7cda24c19c1)
+
+2. Developer B (Bob) executes deployment:
+
+Navigate to `Operations/Tasks`
+- Find the deployment task
+    - Click "Deploy"
+    - Click "Start Deploy"
+- Monitor deployment progress in Operation Logs
+
+![pro-php-example-deploy-1](https://github.com/user-attachments/assets/b78dcadd-0f65-45f1-bdbb-98840134d170)
+
+![pro-php-example-deploy-2](https://github.com/user-attachments/assets/44e1b1cd-9414-4bf9-9d0f-06159975eda2)
+
+![pro-php-example-deploy-3](https://github.com/user-attachments/assets/93282caa-51e4-4167-a7f8-bd9ecfa71eb4)
+
+3. Verify deployment:
+```bash
+# Check version endpoint
+curl http://server:8081/version
+{"version":"1.0.4"}
+
+# Check main endpoint
+curl http://server:8081/
+{"message":"Hello World from CelerBuild!"}
+```
+> **Note**:
+> - Replace "server" with your actual server IP address
+> - A response similar to `{"version":"1.0.4"}` indicates successful deployment
+> - If you cannot access the endpoint, check:
+>   - Server firewall settings
+>   - Port 8081 accessibility
+>   - Application running status
+
+
+### Scenario 2: Production Tag Deployment
+1. Developer B (Bob) creates deployment for prod environment:
+
+Navigate to `Operations/Applications`
+- Select project "pro-celerbuild-example-java-prod"
+- Fill in:
+    - Title: "Deploy v1.0.3 to Production"
+    - Description: "Updating production version to v1.0.3"
+- Submit for review
+
+![pro-example-php-prod-apply-1](https://github.com/user-attachments/assets/ab507b3b-5aea-42e9-82e1-a2463dcd5902)
+
+![pro-example-php-prod-apply-2](https://github.com/user-attachments/assets/b17967bc-6a35-4560-b533-62cae205bb51)
+
+> **Note**:
+> - Here we select v1.0.3 as an example
+> - The deployment process remains the same regardless of which tag version you select
+
+2. Developer A (Jerry) reviews and approves:
+* 1. After logging in, ensure the correct space is selected.
+* 2. Check the notification icon for new messages. You'll see a new ticket assigned to you; click "View Details".
+* 3. Click "Review", select "Approved", provide feedback, and finally click "Submit Review".
+
+![php-example-pro-review-1](https://github.com/user-attachments/assets/62b5497d-48fb-49f2-9aeb-5aa59f1f6e06)
+
+![php-example-pro-review-2](https://github.com/user-attachments/assets/1be8191b-7d58-45d0-b4f6-bca31b4e3e0c)
+
+3. Developer B (Bob) executes deployment:
+
+* 1. After logging in, ensure the correct space is selected.
+* 2. Check the notifications for new messages. You'll see your ticket has been reviewed and approved; click "View Details".
+* 3. In the ticket details, click the "Deploy" button.
+* 4. Navigate to the specific task page, click "Start Deployment" to begin the deployment.
+* 5. Monitor the logs and server status. If any issues arise, a prompt will provide guidance.
+
+![pro-php-example-deployment-1](https://github.com/user-attachments/assets/656ea3e9-c9f7-4ddb-b11d-691d977d10b2)
+
+![pro-php-example-deployment-2](https://github.com/user-attachments/assets/77ae6652-3f35-4c97-9512-79d4cbebffe4)
+
+![pro-php-example-deployment-3](https://github.com/user-attachments/assets/cea72449-96e3-4ff4-99f2-afeadad84112)
+
+4. Verify deployment:
+```bash
+# Check version endpoint
+curl http://server:8081/version
+{"version":"1.0.3"}
+
+# Check main endpoint
+curl http://server:8081/
+{"message":"Hello World from CelerBuild!"}
+
+```
+
+## Rollback Operations
+
+> **Note**:
+> - Branch deployment rollback is not demonstrated here because the system only maintains the latest committed version
+> - We'll demonstrate rollback using tag deployments instead
+> - Rollback can only be performed to previously deployed tags in the system
+
+### Tag Deployment Rollback Example
+
+#### 1. Initial Deployment (v1.0.3)
+
+> For detailed deployment steps, refer to the [Production Tag Deployment](/deployment-examples/php-projects/symfony-framework-pro#scenario-2-production-tag-deployment) section above.
+
+1. Developer B (Bob) creates deployment:
+
+Navigate to `Operations/Applications`
+- Select project "pro-celerbuild-example-php-prod"
+- Fill in:
+    - Title: "Initial Deploy v1.0.3"
+    - Description: "Initial production deployment: Version: v1.0.3"
+- Select tag "v1.0.3"
+- Submit for review
+
+2. Developer A (Jerry) reviews and approves
+
+3. Developer B (Bob) executes deployment
+
+4. Verify deployment:
+```bash
+curl http://server:8081/version
+{"version":"1.0.3"}
+```
+
+#### 2. Upgrade to v1.0.4
+> For detailed deployment steps, refer to the [Production Tag Deployment](/deployment-examples/php-projects/symfony-framework-pro#scenario-2-production-tag-deployment) section above.
+
+
+1. Developer B (Bob) creates deployment:
+
+Navigate to `Operations/Applications`
+- Select project "pro-celerbuild-example-php-prod"
+- Fill in:
+      - Title: "Upgrade to v1.0.4"
+      - Description: "Production version upgrade: From v1.0.3 To v1.0.4"
+- Select tag "v1.0.4"
+- Submit for review
+
+
+2. Developer A (Jerry) reviews and approves
+
+3. Developer B (Bob) executes deployment
+
+
+4. Verify upgrade:
+```bash
+curl http://server:8081/version
+{"version":"1.0.4"}
+```
+
+#### 3. Rollback to v1.0.3
+1. Developer B (Bob) initiates rollback:
+
+Navigate to `Operations/Applications`
+- Find project
+- Click Actions → "Apply Rollback"
+- Fill in:
+  - Title: "Rollback from v1.0.4 to v1.0.3"
+  - Description: "Rolling back production version"
+- Select rollback version v1.0.3
+- Submit for review
+
+![pro-php-example-apply-rollback-1](https://github.com/user-attachments/assets/2d23434f-61b9-45ec-9ece-b2db0ce480c3)
+
+![pro-php-example-apply-rollback-2](https://github.com/user-attachments/assets/b1ee63ba-782d-4c2b-b11d-eed00679013e)
+
+2. Leader (Tom) reviews and approves:
+
+Navigate to `Operations/Applications`
+- Review rollback request
+- Select Review Status "Approved"
+- Add approval comments: "Rollback to v1.0.3 approved."
+- Click "Submit Review"
+
+![pro-php-example-apply-rollback-3](https://github.com/user-attachments/assets/a387d760-7b67-4d6e-8950-a4ae5809e84f)
+
+![pro-php-example-apply-rollback-4](https://github.com/user-attachments/assets/dc4498cf-e0a4-47cc-bd8a-2e7c31a496cb)
+
+> **Note**:
+> - Both Project Owner (Tom) and Project Master (Jerry) have permission to review rollback requests
+> - In this example, we demonstrate Tom reviewing the rollback for clarity of role responsibilities
+> - In practice, Jerry could also review and approve this rollback request
+
+3. Developer B (Bob) executes rollback:
+
+- Check the notifications for new messages. You'll see your ticket has been reviewed and approved; click "View Details".
+- Click "Rollback"
+- Click "Start Rollback"
+- Monitor rollback progress
+
+![pro-php-example-apply-rollback-5](https://github.com/user-attachments/assets/5bcfac62-599e-41a5-88df-d40485368171)
+
+![pro-php-example-apply-rollback-6](https://github.com/user-attachments/assets/4875c268-810a-45da-922b-1daa032bb1e5)
+
+![pro-php-example-apply-rollback-7](https://github.com/user-attachments/assets/50af0a48-948b-4c1d-8dbd-b8f7d9b828d5)
+
+![pro-php-example-apply-rollback-8](https://github.com/user-attachments/assets/141dcd77-c2b4-4e57-affb-1630f615c5ef)
+
+4. Verify rollback:
+```bash
+curl http://server:8081/version
+{"version":"1.0.3"}
+```
+
+For detailed rollback instructions, see:
+- [Rollback Deployment](/user-guide/rollback-deployment#initiating-a-rollback)
+- [Execute Deployment Task](/user-guide/execute-deployment-task)
+
+Congratulations! You have successfully learned how to deploy Symfony Framework using CelerBuild Pro Edition, including team-based deployment workflows, approval processes, and version management! 🎉

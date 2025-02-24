@@ -1,0 +1,115 @@
+# Administrator Guide
+import { Callout } from 'nextra-theme-docs'
+
+This guide provides comprehensive instructions for system administrators to manage the CelerBuild platform.
+
+## Base Module Management
+
+### User Management
+
+
+<Callout type="info">
+    User management features vary by version:
+
+    **Standard Version**
+    - Single admin user only
+    - No additional user management features
+
+    **Pro Version**
+    - Create and manage multiple users
+    - Reset user passwords
+    - Assign user roles
+    - Manage user permissions
+</Callout>
+
+[Learn more about User Management →](./admin-guide/user-management)
+
+### Space Management
+Manage organizational spaces:
+- Create and configure spaces
+- Assign space owners
+- Manage space settings
+- Monitor space usage
+
+[Learn more about Space Management →](./admin-guide/space-management)
+
+### Server Cluster Management
+Configure and manage server clusters:
+- Create server clusters
+- Configure cluster settings
+- Monitor cluster status
+- Manage cluster resources
+
+[Learn more about Server Cluster Management →](./admin-guide/server-cluster-management)
+
+### Server Management
+Manage individual servers:
+- Add and configure servers
+- Set up SSH connections
+- Monitor server status
+- Manage server resources
+
+[Learn more about Server Management →](./admin-guide/server-management)
+
+### Environment Management
+Configure deployment environments:
+- Create and manage environments
+- Configure environment variables
+- Set environment permissions
+- Monitor environment status
+
+[Learn more about Environment Management →](./admin-guide/environment-management)
+
+## Project Management
+
+<Callout type="info">
+    Project management permissions vary by version:
+
+    **Standard Version**
+    - Only administrators can manage projects
+
+    **Pro Version**
+    - Administrators can manage all projects
+    - Space owners can manage projects within their spaces
+    - Project owners can manage their specific projects
+</Callout>
+
+### Project Setup and Configuration
+Learn how to manage projects:
+- Create new projects
+- Configure project settings
+- Set up deployment parameters
+- Manage project access
+
+For different roles:
+- **Administrator**: Full access to all projects
+- **Space Owner**: Full access to projects within their spaces
+- **Project Owner**: Full access to their specific projects
+
+[Learn more about Project Management →](./admin-guide/project-management)
+
+<Callout type="warning">
+    If you are a space owner or project owner in Pro version, please refer to:
+    - [Space Owner Guide](./space-owner-guide) for space-level project management
+    - [Project Owner Guide](./project-owner-guide) for project-specific management
+</Callout>
+
+## Best Practices
+
+### Security
+- Implement strong password policies
+- Regularly review user permissions
+- Monitor access logs
+- Keep SSH keys secure
+
+### Maintenance
+- Regular system updates
+- Monitor system resources
+- Backup configuration data
+- Review server health
+
+### Organization
+- Maintain clear naming conventions
+- Document configuration changes
+- Regular audit of users and permissions
+- Monitor space usage and resources

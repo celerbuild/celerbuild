@@ -1,0 +1,373 @@
+# Deploying Java Projects with CelerBuild Using the Spring Boot Framework Example
+
+This guide demonstrates how to deploy a Java Spring Boot application using CelerBuild Standard Edition, including branch deployment, tag deployment, and tag version rollback operations.
+
+## Prerequisites
+
+> **Important Note**:
+> - For this tutorial, Java and Maven installation is required on the target server
+> - Local Java and Maven installation is recommended depending on your build strategy:
+>   - If building locally and uploading to remote server: both local and remote installation needed
+>   - If building only on remote server: only remote installation needed
+> - The System Service Setup must be configured on the target deployment server
+
+### 1. System Prerequisites
+Complete all [Prerequisites](/prerequisites) setup steps.
+
+### 2. Java Environment Setup
+
+#### Installing Java and Maven
+
+##### macOS
+```bash
+# Using Homebrew
+brew install openjdk@17
+brew install maven
+
+# Create system Java symlink
+sudo ln -sfn /usr/local/opt/openjdk@17/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-17.jdk
+
+# Add to ~/.zshrc
+echo 'export PATH="/usr/local/opt/openjdk@17/bin:$PATH"' >> ~/.zshrc
+echo 'export JAVA_HOME="/usr/local/opt/openjdk@17"' >> ~/.zshrc
+
+# Verify installation
+java --version
+mvn --version
+```
+
+##### Ubuntu/Debian
+```bash
+# Update package list
+sudo apt update
+
+# Install Java and Maven
+sudo apt install openjdk-17-jdk maven
+
+# Verify installation
+java --version
+mvn --version
+```
+
+##### CentOS/RHEL
+```bash
+# Install Java and Maven
+sudo yum install java-17-openjdk-devel maven
+
+# Verify installation
+java --version
+mvn --version
+```
+
+### 3. System Service Setup
+
+On the target deployment server, create a systemd service file for managing the Spring Boot application. This step is required for proper application management and auto-restart capabilities.
+
+> **Important**: This setup must be performed on each target deployment server.
+
+```bash copy
+sudo vim /etc/systemd/system/celerbuild-example-java.service
+```
+
+Add the following content:
+
+```ini copy
+[Unit]
+Description=CelerBuild Example Java Application
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/celerbuild-example-java
+Environment=SPRING_PROFILES_ACTIVE=dev
+ExecStart=java -jar app.jar --spring.profiles.active=${SPRING_PROFILES_ACTIVE}
+SuccessExitStatus=143
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+> **Configuration Notes**:
+> - User:
+>   - Change `ubuntu` to your actual service user
+>   - Ensure the user has proper permissions to run the application
+>   - Example: `User=deploy` if using a deploy user
+> - WorkingDirectory:
+>   - Adjust `/home/ubuntu/...` to match your user's home directory
+>   - Must be an absolute path
+>   - Example: `/home/deploy/celerbuild-example-java` for deploy user
+> - Environment:
+>   - Set `SPRING_PROFILES_ACTIVE=dev` for development environment
+>   - Set `SPRING_PROFILES_ACTIVE=prod` for production environment
+>   - This value determines which Spring profile to use
+> - ExecStart:
+>   - The path to Java executable should be accessible to the service user
+>   - The jar file name should match your actual application jar
+>   - Example: `ExecStart=/usr/bin/java -jar app.jar`
+
+## Branch Deployment (Development Environment)
+
+### 1. Create Server Infrastructure
+
+#### Create Server Cluster
+- Navigate to `Global/Server Clusters`
+- Create a cluster named "example-java-server-cluster(dev)"
+
+![image](https://github.com/user-attachments/assets/8bb1a473-1ef6-4715-b88a-440ae905f16a)
+
+#### Add Server
+- Navigate to the `Global/Servers` section or go to the `Actions` menu of the newly created `example-java-server-cluster(dev)` and select "Servers"
+- Select cluster "example-java-server-cluster(dev)"
+- Fill in:
+    - Server Name
+    - Server IP
+    - SSH Port (default: 22)
+
+![image](https://github.com/user-attachments/assets/c4582b83-911c-44f7-8ef0-90d316ec433b)
+
+### 2. Import Project Template
+
+#### Download Template
+- Download project template: celerbuild-example-java-dev.yaml
+- Template source: [celerbuild-example-java dev template](https://github.com/celerbuild/celerbuild-example-java/blob/main/project-template/celerbuild-example-java-dev.yaml)
+
+![image](https://github.com/user-attachments/assets/be161d96-6adc-4f84-a8b8-af727b2b5345)
+
+#### Import Template
+- Navigate to `Projects/Projects`
+- Click "Import YAML"
+- Upload the downloaded template
+
+![image](https://github.com/user-attachments/assets/350bf38d-3d3f-43ea-8572-db12ddb4eaed)
+
+#### Create Project
+
+- Review and confirm project settings
+- Click "Create Project" to finish
+
+> Note: This example uses Ubuntu system with `ubuntu` user. Please adjust the Deployment Configuration (Target Deployment Path, Target Repository Path, Deployment User, etc.) according to your actual environment.
+
+![image](https://github.com/user-attachments/assets/566d7946-9a91-45f2-9e86-d5a6db3a1cae)
+
+![image](https://github.com/user-attachments/assets/2a82fdc7-f020-47f6-8770-c43bbd191f87)
+
+### 3. Initiating Deployment
+1. Go to `Operations/Applications`
+2. Select project "celerbuild-example-java-dev"
+3. Fill in Title and Description
+4. Click sync icon next to "Branch" and select latest dev branch
+5. Click "Submit Application"
+
+![image](https://github.com/user-attachments/assets/d38799c1-8e9f-4887-947c-166289c4065e)
+
+![image](https://github.com/user-attachments/assets/70b502b9-a422-447f-a5f7-f92e44511860)
+
+### 4. Executing Deployment
+1. In `Operations/Tasks`, find your project task
+2. Click "Deploy" button
+3. On the task page, click "Start Deploy"
+4. Monitor Server Status and Operation Logs
+5. If issues occur, check error messages and retry deployment after fixing
+
+![image](https://github.com/user-attachments/assets/2ba193c5-3cef-4aac-a729-01142a37cb46)
+
+![image](https://github.com/user-attachments/assets/02e03070-c780-4eb3-9a3d-4a41b828a504)
+
+![image](https://github.com/user-attachments/assets/be9d3fa8-ff15-4cb3-8014-85fa6e55e83b)
+
+### 5. Verification
+Access `http://server:8083/version` (replace "server" with your server address)
+
+```bash
+# Example command
+➜  ~ curl http://server:8083/version
+
+# Expected response
+{"version":"1.0.0"}
+```
+
+> **Note**:
+> - Replace "server" with your actual server IP address
+> - A response similar to `{"version":"1.0.0"}` indicates successful deployment
+> - If you cannot access the endpoint, check:
+>   - Server firewall settings
+>   - Port 8083 accessibility
+>   - Application running status using `sudo systemctl status springboot-app`
+
+## Tag Deployment (Production Environment)
+
+### 1. Create Server Infrastructure
+
+#### Create Server Cluster
+- Navigate to `Global/Server Clusters`
+- Create a cluster named "example-java-server-cluster(prod)"
+
+![image](https://github.com/user-attachments/assets/f224b9ad-5840-4407-87d8-ed46de2d2d50)
+
+#### Add Server
+- Navigate to the `Global/Servers` section
+- Select cluster "example-java-server-cluster(prod)"
+- Fill in:
+    - Server Name
+    - Server IP
+    - SSH Port (default: 22)
+
+![image](https://github.com/user-attachments/assets/a1e55b5e-821a-4e7d-bf52-2f898ac9bd69)
+
+### 2. Import Project Template
+
+#### Download Template
+- Download project template: celerbuild-example-java-prod.yaml
+- Template source: [celerbuild-example-java prod template](https://github.com/celerbuild/celerbuild-example-java/blob/main/project-template/celerbuild-example-java-prod.yaml)
+
+![image](https://github.com/user-attachments/assets/488fe981-9b79-4876-90ee-2cb1583cf8b0)
+
+#### Import Template
+- Navigate to `Projects/Projects`
+    - Click "Import YAML"
+    - Upload the downloaded template
+
+![image](https://github.com/user-attachments/assets/4e7bbcef-b669-4214-b6b8-f38167f2ac53)
+
+#### Create Project
+- Review and confirm project settings
+- Click "Create Project" to finish
+> Note: This example uses Ubuntu system with `ubuntu` user. Please adjust the Deployment Configuration (Target Deployment Path, Target Repository Path, Deployment User, etc.) according to your actual environment.
+
+![image](https://github.com/user-attachments/assets/60fe9c9e-dfe8-435f-85af-8d7128ed5483)
+
+![image](https://github.com/user-attachments/assets/635d563d-bab9-4410-b332-155d866041f8)
+
+### 3. Initiating Deployment
+1. Go to `Operations/Applications`
+2. Select project "celerbuild-example-java-prod"
+3. Fill in deployment information:
+   - Title: "Deploy v1.0.0"
+   - Description: "Initial deployment of v1.0.0"
+4. Click sync icon next to "Tag" and select "v1.0.0"
+5. Click "Submit Application"
+
+![image](https://github.com/user-attachments/assets/4f70a707-c23d-4f69-97db-8bccc410ccdd)
+
+![image](https://github.com/user-attachments/assets/fc335670-8ca6-484e-9627-53628f0338dc)
+
+### 4. Executing Deployment
+Follow the same steps as branch deployment execution.
+
+### 5. Verification
+```bash
+curl http://server:8083/version
+{"version":"1.0.0"}
+```
+
+## Rollback Operations
+
+> **Note**: Branch deployment rollback is not demonstrated here because the system only maintains the latest committed version. We'll demonstrate rollback using tag deployments instead.
+
+### Tag Deployment Rollback Example
+
+#### 1. Initial Deployment (v1.0.0)
+> For detailed deployment steps, refer to:
+> - [Initiating Deployment](/deployment-examples/java-projects/spring-boot-framework#3-initiating-deployment-1)
+> - [Executing Deployment](/deployment-examples/java-projects/spring-boot-framework#4-executing-deployment-1)
+
+Verify deployment:
+```bash
+curl http://server:8080/version
+{"version":"1.0.0"}
+```
+
+#### 2. Upgrade to v1.0.1
+> For detailed deployment steps, refer to:
+> - [Initiating Deployment](/deployment-examples/java-projects/spring-boot-framework#3-initiating-deployment-1)
+> - [Executing Deployment](/deployment-examples/java-projects/spring-boot-framework#4-executing-deployment-1)
+
+1. Go to `Operations/Applications`
+2. Create new deployment
+3. Fill in deployment information:
+   - Title: "Upgrade to v1.0.1"
+   - Description: "Upgrading from v1.0.0 to v1.0.1"
+4. Select tag "v1.0.1"
+5. Submit and execute deployment
+6. Verify upgrade:
+
+```bash
+curl http://server:8083/version
+{"version":"1.0.1"}
+```
+
+#### 3. Rollback to v1.0.0
+1. In `Operations/Applications`, find your project
+2. Click Actions (three dots) and select "Apply Rollback"
+3. Fill in rollback information:
+   - Title: "Rollback to v1.0.0"
+   - Description: "Rolling back from v1.0.1 to v1.0.0"
+4. Click sync icon next to "Select Rollback Tag"
+5. Select "v1.0.0" from the available tags
+6. Click "Submit Rollback"
+
+![image](https://github.com/user-attachments/assets/9e5dfd95-a65d-4b0c-8b5f-d117d4a595e9)
+
+![image](https://github.com/user-attachments/assets/56c496ea-044e-47a5-ac5c-1bd694593f11)
+
+#### 4. Execute Rollback
+1. Go to `Operations/Tasks`
+2. Find your rollback task
+3. Click "Rollback" in Actions
+4. Click "Start Rollback" on the task page
+5. Monitor Server Status and Operation Logs
+6. Verify rollback success:
+
+![image](https://github.com/user-attachments/assets/c7fb443b-382d-487b-8019-6515a61df943)
+
+![image](https://github.com/user-attachments/assets/744576b7-c75f-4976-8bd9-66a95d831636)
+
+![image](https://github.com/user-attachments/assets/6896919c-124a-430c-9a55-4d77b69b4ca6)
+
+
+```bash
+curl http://server:8083/version
+{"version":"1.0.0"}
+```
+
+For detailed rollback instructions, see:
+- [Rollback Deployment](/user-guide/rollback-deployment#initiating-a-rollback)
+- [Execute Deployment Task](/user-guide/execute-deployment-task)
+
+
+## Additional Notes
+
+### Application Logs
+View application logs using systemd:
+```bash
+# View all logs
+sudo journalctl -u celerbuild-example-java
+
+# View recent logs
+sudo journalctl -u celerbuild-example-java -n 100
+
+# Follow logs in real-time
+sudo journalctl -u celerbuild-example-java -f
+```
+
+### Service Management
+Common systemd commands for managing the application:
+```bash
+# Check service status
+sudo systemctl status celerbuild-example-java
+
+# Start service
+sudo systemctl start celerbuild-example-java
+
+# Stop service
+sudo systemctl stop celerbuild-example-java
+
+# Restart service
+sudo systemctl restart celerbuild-example-java
+```
+
+Congratulations! You have successfully learned how to deploy Spring Boot Framework using CelerBuild Standard Edition, including branch deployment, tag deployment, and tag version rollback operations! 🎉
+

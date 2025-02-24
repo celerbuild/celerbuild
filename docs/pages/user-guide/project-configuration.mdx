@@ -1,0 +1,166 @@
+# Project Configuration in CelerBuild
+import { Callout } from 'nextra-theme-docs'
+
+<Callout type="info">
+    Project configuration can be managed by different roles depending on your CelerBuild version:
+
+    **Standard Version**
+    - Administrators: Full control over all project configurations
+
+    **Pro Version**
+    - Administrators: Full access to all project configurations
+    - Space Owners: Can configure projects within their spaces
+    - Project Owners: Can configure their own projects
+</Callout>
+
+CelerBuild project configuration consists of four main sections: Project Information, Repository Settings, Deployment Configuration, and Deployment Commands. This guide will help you understand and set up each section effectively.
+
+## Configuration Overview
+
+![configuration-project-overview-1](https://github.com/user-attachments/assets/60ef80e7-038b-4d95-9148-8d1572c94159)
+![configuration-project-overview-2](https://github.com/user-attachments/assets/3e88b7cf-c622-4ddb-a831-66c54e48d39f)
+
+### Space Selection
+
+- **Standard Version**: Use the 'default' space.
+- **Pro Version**: Create and manage multiple spaces.
+- Organize projects by team or department.
+
+## 1. Project Information
+
+Basic information about your project:
+
+1. **Project Name**
+    - Enter a unique, descriptive name
+    - Used to identify your project in CelerBuild
+
+2. **Environment**
+    - Select deployment environment (dev, staging, production)
+    - Helps organize and manage different deployment stages
+
+
+
+## 2. Repository Settings
+
+Configure your source code repository settings:
+
+1. **Git Repository**
+    - Enter your project's Git repository URL
+    - Supports GitHub, GitLab, Bitbucket, and other Git platforms
+
+2. **Branch/Tag Settings**
+    - Branch: Specify which branches to use
+    - Tag: Set the number of latest tags to display
+    - Limiting branches/tags improves synchronization efficiency
+
+## 3. Deployment Configuration
+
+Set up your deployment environment:
+
+1. **Target Deployment Path**
+    - Specify the server path for project deployment
+    - Example: `/var/www/myapp`
+
+2. **Target Repository Path**
+    - Define storage location for project packages
+    - Example: `/var/repositories/myapp`
+
+3. **Version Retention**
+    - Set number of project versions to retain
+    - Helps manage disk space and rollback options
+
+4. **Server Cluster**
+    - **Pro Version**:
+        - Choose a deployment server cluster.
+        - Server clusters must be imported into the current space resources to be selectable.
+        - Manage multiple servers as a single unit.
+    - **Standard Version**:
+        - Select server clusters from global options, as space resources management is not available.
+        - Manage multiple servers as a single unit.
+
+5. **Deployment User**
+    - Specify user account for deployment execution
+    - Must exist on all cluster servers
+    - Requires necessary permissions
+
+## 4. Deployment Commands
+
+Configure the commands for your deployment process:
+
+### Build Commands
+
+Example usage:
+```shell copy
+make build && cd build && tar -zcvf ${LOCAL_PACKAGE_FILE} *
+```
+
+Key points about build commands:
+    - Customize `make build && cd build` for your project
+    - Keep `tar -zcvf ${LOCAL_PACKAGE_FILE} *` as the final command
+    - `${LOCAL_PACKAGE_FILE}` is a required CelerBuild variable
+
+### Pre-deployment Commands (Optional)
+Commands executed before the main deployment:
+
+Example usage:
+
+```shell copy
+PROJECT_DIR="${TARGET_DEPLOYMENT_PATH}/${TARGET_DEPLOYMENT_PROJECT_NAME}"
+[ -d "$PROJECT_DIR" ] && cd "$PROJECT_DIR" && ./stop.sh
+```
+
+### Post-deployment Commands (Optional)
+Commands executed after deployment completion:
+
+Example usage:
+
+```shell copy
+cd "${TARGET_DEPLOYMENT_PATH}/${TARGET_DEPLOYMENT_PROJECT_NAME}" && ./start.sh
+```
+
+## Built-in Environment Variables
+
+CelerBuild provides these variables for your deployment scripts:
+
+    - `${LOCAL_PACKAGE_FILE}`: Package file path
+    - `${TARGET_DEPLOYMENT_PATH}`: Deployment path
+    - `${TARGET_DEPLOYMENT_PROJECT_NAME}`: Project name on target server
+
+Example usage:
+
+```shell copy
+PROJECT_DIR="${TARGET_DEPLOYMENT_PATH}/${TARGET_DEPLOYMENT_PROJECT_NAME}"
+[ -d "$PROJECT_DIR" ] && cd "$PROJECT_DIR" && ./stop.sh || echo "Directory $PROJECT_DIR does not exist"
+```
+
+## Best Practices
+
+### Project Organization
+- Use clear, descriptive project names
+- Organize projects into appropriate spaces (Pro version)
+- Maintain consistent environment naming
+
+### Repository Management
+- Keep repository URLs up to date
+- Limit branch/tag numbers for better performance
+- Regular cleanup of unused branches and tags
+
+### Deployment Configuration
+- Use appropriate deployment paths
+- Set reasonable version retention limits
+- Configure correct deployment user permissions
+
+### Command Configuration
+- Optimize build commands for efficiency
+- Test pre/post-deployment commands thoroughly
+- Utilize built-in variables for consistency
+
+### Security
+- Use secure repository URLs
+- Implement proper user permissions
+- Regular security audits of deployment scripts
+
+### Testing
+- Test configuration in staging environment
+- Verify all commands work as expected
+- Document custom configurations

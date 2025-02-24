@@ -1,0 +1,8 @@
+{
+  "common-operations": "Common Operations",
+  "roles-and-permissions": "Roles and Permissions",
+  "project-configuration": "Project Configuration",
+  "creating-deployment": "Creating a Deployment",
+  "execute-deployment-task": "Executing Deployment Tasks",
+  "rollback-deployment": "Rollback Deployment"
+}

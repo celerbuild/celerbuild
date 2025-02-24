@@ -1,0 +1,105 @@
+# Roles and Permissions
+import { Callout } from 'nextra-theme-docs'
+
+This document outlines the different roles and their permissions in CelerBuild.
+
+<Callout type="info">
+    All users (regardless of role) can:
+    - Manage their profile settings
+    - Change their password
+    - Access help & support page
+</Callout>
+
+## Standard Version Role
+
+### Administrator
+- Subscription Management
+    - Activate subscription
+    - Manage subscription
+- System Management
+    - Check for updates
+- Project Management
+    - Create and manage projects
+    - Configure project settings
+- Server & Cluster Management
+    - Create and manage server clusters
+    - Add/remove servers to clusters
+    - Configure server settings
+- Environment Management
+    - Create and manage environments (dev/test/staging/prod)
+    - Configure environment settings
+- Deployment Operations
+    - Create deployment tickets
+    - Review deployment tickets
+    - Execute deployment tasks
+    - Create rollback tickets
+    - Execute rollback tasks
+
+## Pro Version Roles
+
+### Administrator
+- All standard version administrator capabilities
+- Space management
+- Manage all space resources across all spaces
+- Project member management
+- View audit logs
+
+### Space Owner
+- Manages space name and ownership
+- Manage resources within their own space, including space members and server clusters
+- Creates projects within their space
+- Has access to all projects in their space
+- Manages project members in their space
+- Can assign project owners in their space
+
+### Project Owner
+- Manages project settings
+- Controls project member access
+- Reviews deployment requests
+- Manages project configurations
+
+### Project Master
+- Reviews deployment requests
+- Executes deployments
+- Monitors deployment quality
+- Performs rollback when needed
+
+### Developer
+- Creates deployment requests
+- Executes approved deployments
+- Initiates rollback requests
+- Executes approved rollbacks
+
+### Reporter
+- Views all Tickets and Tasks
+- Accesses project information for projects in Tasks list
+- Monitors deployment progress
+- Read-only access to deployment history
+
+## Role Comparison (Pro Version)
+
+| Feature | Admin | Space Owner | Project Owner | Project Master | Developer | Reporter |
+|---------|-------|-------------|---------------|----------------|-----------|-----------|
+| Subscription Management | ✓ | - | - | - | - | - |
+| System Updates | ✓ | - | - | - | - | - |
+| Space Management | ✓ | ✓ | - | - | - | - |
+| Space Resources Management | ✓ | ✓ | - | - | - | - |
+| Project Management | ✓ | ✓ | ✓ | - | - | - |
+| Project Member Management | ✓ | ✓ | ✓ | - | - | - |
+| Server & Cluster Management | ✓ | - | - | - | - | - |
+| Environment Management | ✓ | - | - | - | - | - |
+| View Audit Logs | ✓ | - | - | - | - | - |
+| Create Deployment Tickets | ✓ | ✓ | ✓ | ✓ | ✓ | - |
+| Review Deployment Tickets | ✓ | ✓ | ✓ | ✓ | - | - |
+| Execute Deployment Tasks | ✓ | ✓ | ✓ | ✓ | ✓ | - |
+| Read Access (Projects) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ (in Tasks) |
+| Read Access (Deployments) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+<Callout type="info">
+    Read Access means users can:
+    - View project information
+    - View deployment tickets
+    - View deployment tasks and logs
+    - Monitor deployment progress
+    - Access deployment history
+</Callout>

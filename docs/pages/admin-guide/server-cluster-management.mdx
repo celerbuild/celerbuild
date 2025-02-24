@@ -1,0 +1,66 @@
+# Server Cluster Management
+import { Callout } from 'nextra-theme-docs'
+
+This guide explains how to manage server clusters in CelerBuild. Administrators have access to these functions.
+
+## Overview
+
+Server clusters are logical groupings of servers that simplify management and deployment processes. They allow you to:
+- Organize servers under a common name
+- Manage resources efficiently
+- Streamline deployment workflows
+
+## Creating a Server Cluster
+
+To create a new server cluster:
+
+1. Navigate to the "Server Clusters" section in the admin panel
+2. Click the "New" button
+3. Fill in the required information:
+    - Cluster Name
+
+<Callout type="info">
+    Use descriptive names for clusters to easily identify their purpose and environment.
+</Callout>
+
+4. Click "Create" to add the server cluster
+
+![admin-add-server-cluster](https://github.com/user-attachments/assets/95a9f534-1e06-4380-9d70-b06de816d7ef)
+
+## Editing a Server Cluster
+
+To edit an existing server cluster:
+
+1. Select the cluster from the list
+2. Click "Edit" next to the cluster name
+3. Modify the cluster details as needed
+4. Click "Save" to apply changes
+
+![admin-edit-server-cluster](https://github.com/user-attachments/assets/19356477-72bd-4a4a-bfe7-36ae94bd90c4)
+
+## Deleting a Server Cluster
+
+To delete a server cluster:
+
+1. Select the cluster from the list
+2. Click "Delete" next to the cluster name
+3. Confirm the deletion
+
+![admin-delete-server-cluster](https://github.com/user-attachments/assets/4e51f945-8c64-4c68-a5af-bccf438eacdf)
+
+<Callout type="warning">
+    - Server clusters that are currently used by projects cannot be deleted. Ensure all dependencies are removed before attempting deletion.
+    - Deleting a server cluster is permanent.
+    - Ensure that no active deployments depend on this cluster.
+</Callout>
+
+## Best Practices
+
+- Regularly review and update cluster configurations
+- Use clear naming conventions for clusters
+- Document any changes to cluster settings
+- Monitor cluster performance and resource usage
+
+<Callout type="info">
+    Server clusters help streamline deployment processes by grouping related servers. Ensure that clusters are well-organized and maintained.
+</Callout>

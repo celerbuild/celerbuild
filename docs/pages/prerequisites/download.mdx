@@ -1,3 +1,5 @@
+import { Callout } from 'nextra-theme-docs'
+
 # Download and Install CelerBuild
 
 These instructions will guide you through downloading and installing the latest version of CelerBuild.
@@ -42,15 +44,164 @@ chmod +x celerbuild-{VERSION}-{OS}-{ARCH}
 
 ## 4. Run CelerBuild
 
+### Foreground Mode
 ```shell copy
 ./celerbuild-{VERSION}-{OS}-{ARCH}
 ```
 
-Note: On first run, CelerBuild will create a default configuration file.
+### Background Mode (Recommended for Production)
+
+#### Using systemd (Linux)
+1. Create log files and set permissions:
+```shell copy
+# Replace {USER} with your system user
+sudo touch /var/log/celerbuild.log /var/log/celerbuild.error.log
+sudo chown {USER}:{USER} /var/log/celerbuild.log /var/log/celerbuild.error.log
+```
+
+2. Create a systemd service file:
+```shell copy
+sudo nano /etc/systemd/system/celerbuild.service
+```
+
+3. Add the following content:
+```ini copy
+[Unit]
+Description=CelerBuild Service
+After=network.target
+
+[Service]
+Type=simple
+User={USER}
+Group={USER}
+WorkingDirectory=/path/to/celerbuild-src
+Environment="HOME=/home/{USER}"
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/path/to/celerbuild-src/celerbuild-{VERSION}-linux-amd64
+Restart=always
+RestartSec=3
+StandardOutput=append:/var/log/celerbuild.log
+StandardError=append:/var/log/celerbuild.error.log
+
+[Install]
+WantedBy=multi-user.target
+```
+
+<Callout type="info">
+    Replace the following placeholders:
+    - `{USER}`: Your system username
+    - `/path/to/celerbuild-src`: Actual path to CelerBuild directory
+    - `{VERSION}`: CelerBuild version number
+</Callout>
+
+For example, on Ubuntu with user 'ubuntu':
+```ini copy
+[Unit]
+Description=CelerBuild Service
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/celerbuild-src
+Environment="HOME=/home/ubuntu"
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/home/ubuntu/celerbuild-src/celerbuild-{VERSION}-linux-amd64
+Restart=always
+RestartSec=3
+StandardOutput=append:/var/log/celerbuild.log
+StandardError=append:/var/log/celerbuild.error.log
+
+[Install]
+WantedBy=multi-user.target
+```
+
+4. Set correct permissions:
+```shell copy
+sudo chown -R {USER}:{USER} /path/to/celerbuild-src
+sudo chmod +x /path/to/celerbuild-src/celerbuild-{VERSION}-linux-amd64
+```
+
+5. Start the service:
+```shell copy
+sudo systemctl daemon-reload
+sudo systemctl enable celerbuild
+sudo systemctl start celerbuild
+```
+
+## Verifying Successful Installation
+
+After starting the service, verify it's running correctly:
+
+1. Check service status:
+```shell copy
+sudo systemctl status celerbuild
+```
+
+You should see output similar to:
+```
+● celerbuild.service - CelerBuild Service
+     Loaded: loaded
+     Active: active (running)
+     Main PID: [number]
+     Tasks: 4
+     Memory: ~8.5M
+```
+
+<Callout type="success">
+    Key indicators of successful installation:
+    - Status shows "active (running)"
+    - No error messages in the output
+    - Memory and CPU usage are stable
+</Callout>
+
+2. Verify the web interface:
+```shell copy
+# Check if the service is listening
+curl -I http://localhost:8666
+```
+
+3. Monitor the service:
+```shell copy
+# View real-time logs
+tail -f /var/log/celerbuild.log
+
+# Check resource usage
+sudo systemctl status celerbuild --no-pager
+```
+
+<Callout type="info">
+    The service is now properly installed and running. You can proceed to:
+    1. Access the web interface at http://your-server:8666
+    2. Complete the [activation process](./activation)
+    3. Configure your [database settings](./setup/database-configuration)
+</Callout>
+
+## Troubleshooting
+
+If you encounter issues:
+
+1. Check the logs:
+```shell copy
+tail -f /var/log/celerbuild.log /var/log/celerbuild.error.log
+```
+
+2. Check process status:
+```shell copy
+ps aux | grep celerbuild
+```
+
+<Callout type="warning">
+    Common issues and solutions:
+    - Permission errors: Verify user/group settings
+    - Path issues: Ensure all paths in service file are correct
+    - Service not starting: Check logs for detailed error messages
+</Callout>
 
 ## Next Steps
 
-Before you can start using CelerBuild, you need to set up a database and configure the application. Please refer to the following sections:
-
-1. [Database Configuration](../setup_and_configuration/database_configuration.mdx)
-2. [Remote Sync Setup](../setup_and_configuration/remote_sync_setup.mdx)
+After successful installation:
+1. [Activate CelerBuild](./activation)
+2. [Configure Database](./database-configuration)
+3. [Setup Remote Sync](./remote-sync-setup)

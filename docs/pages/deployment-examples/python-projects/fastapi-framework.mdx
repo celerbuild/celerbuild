@@ -1,0 +1,358 @@
+# Deploying Python Projects with CelerBuild Using the FastAPI Framework Example
+
+This guide demonstrates how to deploy a Python FastAPI application using CelerBuild Standard Edition, including branch deployment, tag deployment, and tag version rollback operations.
+
+## Prerequisites
+
+> **Important Note**:
+> - This project requires Python 3.8+
+> - Local Python installation is recommended depending on your build strategy:
+>   - If building locally and uploading to remote server: both local and remote installation needed
+>   - If building only on remote server: only remote installation needed
+> - The System Service Setup must be configured on the target deployment server
+
+### 1. System Prerequisites
+Complete all [Prerequisites](/prerequisites) setup steps.
+
+### 2. Python Environment Setup
+
+#### Installing Python and pip
+
+##### macOS
+```bash
+# Using Homebrew
+brew install python@3.10  # or any version 3.8+
+
+# Add to ~/.zshrc
+echo 'export PATH="/usr/local/opt/python/bin:$PATH"' >> ~/.zshrc
+
+# Verify installation
+python3 --version  # Should show 3.8 or higher
+pip3 --version
+```
+
+##### Ubuntu/Debian
+```bash
+# Update package list
+sudo apt update
+
+# Install Python and pip (3.8 or higher)
+sudo apt install python3 python3-pip python3-venv
+
+# Verify installation
+python3 --version  # Should show 3.8 or higher
+pip3 --version
+```
+##### CentOS/RHEL
+```bash
+# Enable EPEL repository (required for Python 3.8+)
+sudo yum install epel-release
+
+# Install Python and pip
+sudo yum install python3 python3-pip python3-devel
+
+# If you need a specific version, you can use:
+# sudo yum install python38 python38-pip python38-devel
+
+# Verify installation
+python3 --version  # Should show 3.8 or higher
+pip3 --version
+```
+
+### 3. System Service Setup
+
+On the target deployment server, create a systemd service file for managing the FastAPI application. This step is required for proper application management and auto-restart capabilities.
+
+> **Important**: This setup must be performed on each target deployment server.
+
+```bash copy
+sudo vim /etc/systemd/system/celerbuild-example-python.service
+```
+
+Add the following content:
+```ini copy
+[Unit]
+Description=CelerBuild Example Python Application
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/celerbuild-example-python
+# Set environment: use 'dev' for development, 'prod' for production
+Environment=APP_ENV=dev
+# Use the full path to gunicorn executable
+# Find path using: which gunicorn (after adding ~/.local/bin to PATH)
+ExecStart=/home/ubuntu/.local/bin/gunicorn app.main:app -c gunicorn/gunicorn.${APP_ENV}.py
+# Exit code 143 indicates graceful termination
+SuccessExitStatus=143
+# Maximum time to wait for the service to stop
+TimeoutStopSec=10
+# Restart policy
+Restart=on-failure
+# Time to wait before restart attempts
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+> **Configuration Notes**:
+> - User: Change `ubuntu` to your actual service user
+> - WorkingDirectory: Adjust `/home/ubuntu/...` to match your user's home directory
+> - ExecStart: The path to gunicorn may vary based on your installation method
+>   - Find the correct path using: `export PATH=$PATH:/home/ubuntu/.local/bin && which gunicorn`
+>   - Common paths: `/home/ubuntu/.local/bin/gunicorn` or `/usr/local/bin/gunicorn`
+> - Environment: Set `APP_ENV=dev` for development environment or `APP_ENV=prod` for production environment
+>   - Development: `Environment=APP_ENV=dev`
+>   - Production: `Environment=APP_ENV=prod`
+
+## Branch Deployment (Development Environment)
+
+### 1. Create Server Infrastructure
+
+#### Create Server Cluster
+- Navigate to `Global/Server Clusters`
+- Create a cluster named "example-python-server-cluster(dev)"
+
+![image](https://github.com/user-attachments/assets/3832d97f-ac9c-47cc-9a94-cf9519a744bb)
+
+#### Add Server
+- Navigate to the `Global/Servers` section
+- Select cluster "example-python-server-cluster(dev)"
+- Fill in:
+  - Server Name
+  - Server IP
+  - SSH Port (default: 22)
+
+![image](https://github.com/user-attachments/assets/1fa4083c-81b7-4c64-a034-9f5d6766160c)
+
+### 2. Import Project Template
+
+#### Download Template
+- Download project template: celerbuild-example-python-dev.yaml
+- Template source: [celerbuild-example-python dev template](https://github.com/celerbuild/celerbuild-example-python/blob/main/project-template/celerbuild-example-python-dev.yaml)
+
+![image](https://github.com/user-attachments/assets/e3465539-fbe3-481f-bce8-94aa8cfc1368)
+
+#### Import Template
+- Navigate to `Projects/Projects`
+- Click "Import YAML"
+- Upload the downloaded template
+
+![image](https://github.com/user-attachments/assets/2d156027-9393-40e4-8b88-e754c92058a1)
+
+#### Create Project
+- Review and confirm project settings
+- Click "Create Project" to finish
+
+![image](https://github.com/user-attachments/assets/4b34dd37-461e-405f-ae7f-e07f349cd727)
+
+![image](https://github.com/user-attachments/assets/78d98c99-2080-4a28-b75f-582c0f642279)
+
+> Note: This example uses Ubuntu system with `ubuntu` user. Please adjust the Deployment Configuration (Target Deployment Path, Target Repository Path, Deployment User, etc.) according to your actual environment.
+
+### 3. Initiating Deployment
+1. Go to `Operations/Applications`
+2. Select project "celerbuild-example-python-dev"
+3. Fill in Title and Description
+4. Click sync icon next to "Branch" and select latest dev branch
+5. Click "Submit Application"
+
+![image](https://github.com/user-attachments/assets/6beba9ae-1179-416f-8bd5-559439c6fd4f)
+
+![image](https://github.com/user-attachments/assets/9161e2c8-3f36-4768-87b8-6a380935bc25)
+
+### 4. Executing Deployment
+1. In `Operations/Tasks`, find your project task
+2. Click "Deploy" button
+3. On the task page, click "Start Deploy"
+4. Monitor Server Status and Operation Logs
+5. If issues occur, check error messages and retry deployment after fixing
+
+![image](https://github.com/user-attachments/assets/f3257112-c18d-432f-97e0-1739dd6bbe75)
+
+![image](https://github.com/user-attachments/assets/3ca7b38e-d09c-4eb0-8ce0-be89f5850276)
+
+![image](https://github.com/user-attachments/assets/0d81ebc7-e73d-4b6b-90f7-c81b48899bd1)
+
+### 5. Verification
+Access `http://server:8084/version` (replace "server" with your server address)
+
+```bash
+# Example command
+➜  ~ curl http://server:8084/version
+
+# Expected response
+{"version":"1.0.0"}
+```
+
+## Tag Deployment (Production Environment)
+
+### 1. Create Server Infrastructure
+
+#### Create Server Cluster
+- Navigate to `Global/Server Clusters`
+- Create a cluster named "example-python-server-cluster(prod)"
+
+![image](https://github.com/user-attachments/assets/187cdefd-5ee5-426d-a19b-cf915525974d)
+
+#### Add Server
+- Navigate to the `Global/Servers` section
+- Select cluster "example-python-server-cluster(prod)"
+- Fill in:
+  - Server Name
+  - Server IP
+  - SSH Port (default: 22)
+
+![image](https://github.com/user-attachments/assets/3292b500-7407-45b7-8507-964f07ede408)
+
+### 2. Import Project Template
+
+#### Download Template
+- Download project template: celerbuild-example-python-prod.yaml
+- Template source: [celerbuild-example-python prod template](https://github.com/celerbuild/celerbuild-example-python/blob/main/project-template/celerbuild-example-python-prod.yaml)
+
+![image](https://github.com/user-attachments/assets/ac585d57-37d9-441a-be86-569c0a029fd1)
+
+#### Import Template
+- Navigate to `Projects/Projects`
+- Click "Import YAML"
+- Upload the downloaded template
+
+![image](https://github.com/user-attachments/assets/7fee7336-ca9e-4cab-9b47-2ce98c148640)
+
+#### Create Project
+- Review and confirm project settings
+- Click "Create Project" to finish
+
+![image](https://github.com/user-attachments/assets/331b7035-cbba-4096-a5b2-6dd06a34e883)
+
+![image](https://github.com/user-attachments/assets/01fe6a9e-a5f1-4dc6-b886-23daedf09831)
+
+> Note: This example uses Ubuntu system with `ubuntu` user. Please adjust the Deployment Configuration (Target Deployment Path, Target Repository Path, Deployment User, etc.) according to your actual environment.
+
+### 3. Initiating Deployment
+1. Go to `Operations/Applications`
+2. Select project "celerbuild-example-python-prod"
+3. Fill in deployment information:
+    - Title: "Deploy v1.0.0"
+    - Description: "Initial deployment of v1.0.0"
+4. Click sync icon next to "Tag" and select "v1.0.0"
+5. Click "Submit Application"
+
+![image](https://github.com/user-attachments/assets/25d7e4e9-60b7-4145-acd3-d6c680295203)
+
+![image](https://github.com/user-attachments/assets/a2f7eeab-6d04-4ff4-8d0f-655b4c846681)
+
+### 4. Executing Deployment
+Follow the same steps as branch deployment execution.
+
+![image](https://github.com/user-attachments/assets/d084883f-f548-469c-98e8-6ef260c1c6fe)
+
+![image](https://github.com/user-attachments/assets/35ff76bd-f60d-4b48-ba39-5be08f584c36)
+
+### 5. Verification
+```bash
+curl http://server:8084/version
+{"version":"1.0.0"}
+```
+
+## Rollback Operations
+
+> **Note**: Branch deployment rollback is not demonstrated here because the system only maintains the latest committed version. We'll demonstrate rollback using tag deployments instead.
+
+### Tag Deployment Rollback Example
+
+#### 1. Initial Deployment (v1.0.0)
+> For detailed deployment steps, refer to:
+> - [Initiating Deployment](#3-initiating-deployment-1)
+> - [Executing Deployment](#4-executing-deployment-1)
+
+Verify deployment:
+```bash
+curl http://server:8084/version
+{"version":"1.0.0"}
+```
+
+#### 2. Upgrade to v1.0.1
+1. Go to `Operations/Applications`
+2. Create new deployment
+3. Fill in deployment information:
+    - Title: "Upgrade to v1.0.1"
+    - Description: "Upgrading from v1.0.0 to v1.0.1"
+4. Select tag "v1.0.1"
+5. Submit and execute deployment
+6. Verify upgrade:
+
+```bash
+curl http://server:8084/version
+{"version":"1.0.1"}
+```
+
+#### 3. Rollback to v1.0.0
+1. In `Operations/Applications`, find your project
+2. Click Actions (three dots) and select "Apply Rollback"
+3. Fill in rollback information:
+    - Title: "Rollback to v1.0.0"
+    - Description: "Rolling back from v1.0.1 to v1.0.0"
+4. Click sync icon next to "Select Rollback Tag"
+5. Select "v1.0.0" from the available tags
+6. Click "Submit Rollback"
+
+![image](https://github.com/user-attachments/assets/dfee0fd1-5471-4fa3-922d-46a2f93c2746)
+
+![image](https://github.com/user-attachments/assets/709fcfd8-5f64-457d-bebc-13b5f0259c7e)
+
+#### 4. Execute Rollback
+1. Go to `Operations/Tasks`
+2. Find your rollback task
+3. Click "Rollback" in Actions
+4. Click "Start Rollback" on the task page
+5. Monitor Server Status and Operation Logs
+6. Verify rollback success:
+
+![image](https://github.com/user-attachments/assets/efdb8fe3-f1cd-49e5-a332-f7fe2246335e)
+
+![image](https://github.com/user-attachments/assets/4276c21e-06ad-4c41-b583-57d166a3a250)
+
+```bash
+curl http://server:8084/version
+{"version":"1.0.0"}
+```
+
+For detailed rollback instructions, see:
+- [Rollback Deployment](/user-guide/rollback-deployment#initiating-a-rollback)
+- [Execute Deployment Task](/user-guide/execute-deployment-task)
+
+## Additional Notes
+
+### Application Logs
+View application logs using systemd:
+```bash
+# View all logs
+sudo journalctl -u celerbuild-example-python
+
+# View recent logs
+sudo journalctl -u celerbuild-example-python -n 100
+
+# Follow logs in real-time
+sudo journalctl -u celerbuild-example-python -f
+```
+
+### Service Management
+Common systemd commands for managing the application:
+```bash
+# Check service status
+sudo systemctl status celerbuild-example-python
+
+# Start service
+sudo systemctl start celerbuild-example-python
+
+# Stop service
+sudo systemctl stop celerbuild-example-python
+
+# Restart service
+sudo systemctl restart celerbuild-example-python
+```
+
+Congratulations! You have successfully learned how to deploy FastAPI Framework using CelerBuild Standard Edition, including branch deployment, tag deployment, and tag version rollback operations! 🎉

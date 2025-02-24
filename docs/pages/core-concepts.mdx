@@ -1,0 +1,96 @@
+import { Callout } from 'nextra-theme-docs'
+
+# Core Concepts
+
+Understanding the core concepts of CelerBuild is essential for effective use. This section covers the fundamental ideas that underpin the platform.
+
+## Global
+
+The Global section in CelerBuild allows for centralized management of resources that are not tied to any specific space or project. It includes:
+
+- **Environments, Server Clusters, and Servers**: These resources are managed globally and can be utilized by any project across different spaces. This ensures consistency and ease of management.
+
+In the Pro version, the Global section also includes:
+
+- **Users and Spaces**: Manage all users and spaces from a central location. Spaces can import members from the global user pool, ensuring streamlined user management.
+- **Project Members**: Project members are imported from the current space's member pool. Permissions are assigned by the project owner to ensure appropriate access control within each project.
+
+This centralized approach simplifies resource management and enhances collaboration across teams and projects.
+
+## Spaces
+
+Spaces are the top-level organizational units in CelerBuild. They allow you to:
+- Manage multiple projects within a single space, ensuring organized and efficient project handling
+- Oversee space members, who are imported from the Global user pool, providing a centralized user management system
+- Enable project owners to import and manage members from the space's member pool, ensuring proper access and collaboration within projects
+
+Each space is managed by space owners and serves as a hub for related projects and resources.
+
+## Projects
+
+Projects are the primary units of work within a space. They enable you to:
+- Organize code and configurations
+- Define project-specific settings
+- Manage deployment workflows through tickets and tasks
+
+For the same Git repository, you can create different projects for different environments to achieve isolated deployments.
+
+## Environments
+
+Environments in CelerBuild indicate the target deployment environment for a project, such as:
+- Development
+- Testing
+- Production
+
+Each project is associated with a specific environment, allowing you to:
+- Maintain clear separation between different deployment targets
+- Control deployment processes for each environment
+- Track deployments across different environments
+
+## Server Clusters
+
+Server clusters in CelerBuild are logical groupings of servers. They provide a way to:
+- Organize servers under a common name
+- Simplify management and deployment processes
+
+## Servers
+
+Servers are the actual deployment targets within CelerBuild. They consist of:
+- Server Name
+- Server IP
+- SSH Port
+
+Servers are configured to connect and deploy applications efficiently.
+
+## Deployment Tickets
+
+Deployment tickets are requests for deploying code. They represent:
+- What needs to be deployed (branch/tag)
+- Where to deploy (target environment)
+- Who requested the deployment
+- Who will review the deployment (assigned reviewer)
+- Current status of the deployment request
+
+Tickets help track and manage deployment requests through their lifecycle:
+- Pending: Initial deployment request waiting for review
+- Approved: Deployment request has been approved and ready for execution
+- Rejected: Deployment request has been denied
+- Canceled: Deployment request has been canceled
+
+<Callout type="info">
+    Each deployment ticket requires an assigned reviewer who will be responsible for approving or rejecting the deployment request.
+</Callout>
+
+## Deployment Tasks
+
+Deployment tasks are the actual execution of deployment tickets. They provide:
+- Real-time deployment progress
+- Execution logs
+- Deployment results
+- Task history
+
+Each deployment ticket, when executed, creates a task that:
+- Handles the actual deployment process
+- Records all deployment steps
+- Maintains deployment logs
+- Shows deployment status and results

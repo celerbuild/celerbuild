@@ -1,13 +1,83 @@
 {
-  "index": "Introduction",
-  "how_it_works": "How it works",
-  "plans_and_features": "Plans & Features",
-  "prerequisites": "Prerequisites",
-  "setup_and_configuration": "Setup & Configuration",
-  "for_individuals": "For Individuals",
-  "for_teams": "For Teams",
-  "faq": "FAQ",
-  "community_and_support": "Community & Support",
+  "index": {
+    "title": "Introduction",
+    "theme": {
+      "breadcrumb": false,
+      "pagination": true,
+      "toc": true,
+      "layout": "full"
+    }
+  },
+  "plans-and-features": {
+    "title": "Plans & Features",
+    "theme": {
+      "breadcrumb": false,
+      "pagination": true
+    }
+  },
+  "prerequisites": {
+    "title": "Prerequisites",
+    "theme": {
+      "breadcrumb": false,
+      "pagination": true
+    }
+  },
+  "core-concepts": {
+    "title": "Core Concepts",
+    "theme": {
+      "breadcrumb": false,
+      "pagination": true
+    }
+  },
+  "how-it-works": {
+    "title": "How it works",
+    "theme": {
+      "breadcrumb": false,
+      "pagination": true
+    }
+  },
+  "deployment-examples": {
+    "title": "Deployment Examples",
+    "theme": {
+      "breadcrumb": false,
+      "pagination": true
+    }
+  },
+  "user-guide": {
+    "title": "User Guide",
+    "theme": {
+      "breadcrumb": false,
+      "pagination": true
+    }
+  },
+  "admin-guide": {
+    "title": "Admin Guide",
+    "theme": {
+      "breadcrumb": false,
+      "pagination": true
+    }
+  },
+  "pro-version-guide": {
+    "title": "Pro Version Guide",
+    "theme": {
+      "breadcrumb": false,
+      "pagination": true
+    }
+  },
+  "faq": {
+    "title": "FAQ",
+    "theme": {
+      "breadcrumb": false,
+      "pagination": true
+    }
+  },
+  "community-and-support": {
+    "title": "Community & Support",
+    "theme": {
+      "breadcrumb": false,
+      "pagination": true
+    }
+  },
   "home": {
     "title": "Home",
     "type": "page",
@@ -18,6 +88,12 @@
     "title": "Pricing",
     "type": "page",
     "href": "https://celerbuild.com/pricing",
+    "newWindow": false
+  },
+  "download": {
+    "title": "Download",
+    "type": "page",
+    "href": "https://celerbuild.com/download",
     "newWindow": false
   },
   "contact": {

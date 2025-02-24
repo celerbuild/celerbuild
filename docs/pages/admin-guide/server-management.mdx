@@ -1,0 +1,65 @@
+# Server Management
+import { Callout } from 'nextra-theme-docs'
+
+This guide explains how to manage servers in CelerBuild. Administrators have access to these functions.
+
+## Overview
+
+Servers are the actual deployment targets within CelerBuild. They consist of:
+- Server Name
+- Server IP
+- SSH Port
+
+## Adding a Server
+
+To add a new server:
+
+1. Navigate to the "Servers" section in the admin panel
+2. Click the "New" button
+3. Fill in the required information:
+    - Server Name
+    - Server IP
+    - SSH Port
+    - Assign to a Server Cluster
+4. Click "Create" to add the server
+
+![admin-new-server](https://github.com/user-attachments/assets/a0a61f92-1dd3-497a-8915-1b74118d2006)
+
+<Callout type="info">
+    Ensure that the server is properly configured and accessible via SSH before adding it to CelerBuild.
+</Callout>
+
+## Editing a Server
+
+To edit an existing server:
+
+1. Select the server from the list
+2. Click "Edit" next to the server name
+3. Modify the server details as needed
+4. Click "Save" to apply changes
+
+![admin-edit-server](https://github.com/user-attachments/assets/ad396b8a-da3b-4125-86d6-53907ba6244a)
+
+## Deleting a Server
+
+To delete a server:
+
+1. Select the server from the list
+2. Click "Delete" next to the server name
+3. Confirm the deletion
+
+![admin-delete-server](https://github.com/user-attachments/assets/404779a2-ac81-4422-9506-9fbe6cbd4480)
+
+<Callout type="warning">
+    Deleting a server is permanent and will remove it from all associated clusters. Ensure that no active deployments depend on this server.
+</Callout>
+
+## Best Practices
+
+- Regularly review and update server configurations
+- Use clear naming conventions for servers
+- Document any changes to server settings
+
+<Callout type="info">
+    Proper server management ensures smooth deployment processes and system stability. Regularly check server health and connectivity.
+</Callout>

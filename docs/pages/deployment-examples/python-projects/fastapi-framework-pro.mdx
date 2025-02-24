@@ -1,0 +1,612 @@
+# Deploying Python Projects with CelerBuild Pro Using the FastAPI Framework Example
+
+This guide demonstrates how to deploy a Python project using CelerBuild Pro Version, covering branch deployment, tag deployment, and tag version rollback operations with multiple roles. We'll use the [celerbuild-example-python](https://github.com/celerbuild/celerbuild-example-python) project built with the FastAPI framework.
+
+> **Note**
+> - This tutorial uses the Pro Version. For Standard Version features, please refer to the [Standard Version Guide](/deployment-examples/python-projects/fastapi-framework)
+> - Python 3.8+ is required for FastAPI compatibility
+
+## Prerequisites
+
+> **Important Note**:
+> - For this tutorial, Python 3.8 or higher installation is required on the target server
+> - Local Python installation is recommended depending on your build strategy:
+>   - If building locally and uploading to remote server: both local and remote installation needed
+>   - If building only on remote server: only remote installation needed
+> - The System Service Setup must be configured on the target deployment server
+
+### 1. System Prerequisites
+Complete all [Prerequisites](/prerequisites) setup steps.
+
+### 2. Python Environment Setup
+
+#### Installing Python and pip
+
+##### macOS
+```bash
+# Using Homebrew
+brew install python@3.10  # or any version 3.8+
+
+# Add to ~/.zshrc
+echo 'export PATH="/usr/local/opt/python/bin:$PATH"' >> ~/.zshrc
+
+# Verify installation
+python3 --version  # Should show 3.8 or higher
+pip3 --version
+```
+
+##### Ubuntu/Debian
+```bash
+# Update package list
+sudo apt update
+
+# Install Python and pip (3.8 or higher)
+sudo apt install python3 python3-pip python3-venv
+
+# Verify installation
+python3 --version  # Should show 3.8 or higher
+pip3 --version
+```
+##### CentOS/RHEL
+```bash
+# Enable EPEL repository (required for Python 3.8+)
+sudo yum install epel-release
+
+# Install Python and pip
+sudo yum install python3 python3-pip python3-devel
+
+# If you need a specific version, you can use:
+# sudo yum install python38 python38-pip python38-devel
+
+# Verify installation
+python3 --version  # Should show 3.8 or higher
+pip3 --version
+```
+
+### 3. System Service Setup
+
+On the target deployment server, create a systemd service file for managing the FastAPI application. This step is required for proper application management and auto-restart capabilities.
+
+> **Important**: This setup must be performed on each target deployment server.
+
+```bash copy
+sudo vim /etc/systemd/system/celerbuild-example-python.service
+```
+
+Add the following content:
+```ini copy
+[Unit]
+Description=CelerBuild Example Python Application
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/celerbuild-example-python
+# Set environment: use 'dev' for development, 'prod' for production
+Environment=APP_ENV=dev
+# Use the full path to gunicorn executable
+# Find path using: which gunicorn (after adding ~/.local/bin to PATH)
+ExecStart=/home/ubuntu/.local/bin/gunicorn app.main:app -c gunicorn/gunicorn.${APP_ENV}.py
+# Exit code 143 indicates graceful termination
+SuccessExitStatus=143
+# Maximum time to wait for the service to stop
+TimeoutStopSec=10
+# Restart policy
+Restart=on-failure
+# Time to wait before restart attempts
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+> **Configuration Notes**:
+> - User: Change `ubuntu` to your actual service user
+> - WorkingDirectory: Adjust `/home/ubuntu/...` to match your user's home directory
+> - ExecStart: The path to gunicorn may vary based on your installation method
+>   - Find the correct path using: `export PATH=$PATH:/home/ubuntu/.local/bin && which gunicorn`
+>   - Common paths: `/home/ubuntu/.local/bin/gunicorn` or `/usr/local/bin/gunicorn`
+> - Environment: Set `APP_ENV=dev` for development environment or `APP_ENV=prod` for production environment
+>   - Development: `Environment=APP_ENV=dev`
+>   - Production: `Environment=APP_ENV=prod`
+
+## Role Setup and Permissions
+
+### 1. Team Structure
+- Leader (Tom): Admin + Space Owner + Project Owner
+    - Username: tom
+    - Email: tom@example.com
+
+- Developer A (Jerry): Project Master
+    - Username: jerry
+    - Email: jerry@example.com
+
+- Developer B (Bob): Developer
+    - Username: bob
+    - Email: bob@example.com
+
+### 2. Initial Setup Process (by Tom)
+
+#### 2.1 Create Users
+1. Navigate to `Base/Users`
+2. Create team members' accounts:
+```
+Create Jerry's account:
+- Username: jerry
+- Email: jerry@example.com
+
+Create Bob's account:
+- Username: bob
+- Email: bob@example.com
+   ```
+
+> **Note**:
+> - By default, there is an admin user
+> - You can promote yourself (Tom) to admin and then delete the default admin user
+> - At least one admin user must exist in the system at all times
+
+![create-user-1](https://github.com/user-attachments/assets/9216f24f-ff3b-4be2-a9e6-b29a23d4a0d8)
+
+![create-user-2](https://github.com/user-attachments/assets/d885eea8-968d-464f-a088-191afb6cfa5c)
+
+
+#### 2.2 Create Space
+1. Navigate to `Global/Spaces`
+2. Create new space:
+    - Name: python-example-space
+    - Description (Optional): A dedicated space for Python language deployment examples, including FastAPI framework and other Python-based applications.
+
+![image](https://github.com/user-attachments/assets/9a7d149e-2550-42db-9126-ee78825d0b76)
+
+#### 2.3 Import Space Members
+
+Import members from the global user pool to ensure team members have access and can collaborate.
+
+1. Locate the space you just added.
+2. In the corresponding Actions menu, find and click the **Members** button.
+3. Click on **Import Members** to proceed with the import.
+
+![image](https://github.com/user-attachments/assets/67cc1dba-f284-488f-9207-10ff849c6bec)
+
+![image](https://github.com/user-attachments/assets/8fd29495-6c06-4cfb-a780-14fa6a7345d6)
+
+![image](https://github.com/user-attachments/assets/0b21d67c-ddc8-4b81-a703-b93baae5a9c4)
+
+#### 2.4 Set Space Owner
+
+Designate a member as the space owner, responsible for managing resources and permissions within the space.
+In this example, set Tom as the Space Owner.
+
+1. Locate the user named Tom.
+2. In the corresponding Actions menu, click **Edit**.
+3. Change his permissions to **Owner**.
+
+![image](https://github.com/user-attachments/assets/d9ec1f76-7fa8-4e4e-aab6-68f31a09c1a4)
+
+### 3. Create Server Infrastructure
+
+#### 3.1 Create Server Clusters
+1. Navigate to `Global/Server Clusters`
+2. Create development cluster:
+  - Click "New"
+  - Fill in cluster details:
+       - Name: pro-example-python-server-cluster(dev)
+       - Select Environment: dev
+       - Select Status: Available
+  - Click "Create"
+
+![image](https://github.com/user-attachments/assets/c56704b6-1eec-4d76-af2b-a168da06dc12)
+
+3. Create production cluster:
+   - Click "New"
+   - Fill in cluster details:
+       - Name: pro-example-python-server-cluster(prod)
+       - Select Environment: prod
+       - Select Status: Available
+   - Click "Create"
+
+![image](https://github.com/user-attachments/assets/eee68db4-929e-4a68-96c4-d5bc6be7f4a8)
+
+#### 3.2 Add Servers
+
+1. Navigate to `Global/Servers`
+
+2. Add development server:
+  - Click "New"
+  - Fill in server details:
+        - Select cluster: pro-example-python-server-cluster(dev)
+        - Server Name: pro-python-dev-server-1
+        - Server IP: Your server IP
+        - SSH Port: Your SSH port (default: 22)
+  - Click "Create"
+
+![image](https://github.com/user-attachments/assets/4eba39e1-d8d1-4969-82e6-f2e7fda0155a)
+
+3. Add production server:
+  - Click "New"
+  - Fill in server details:
+       - Select cluster: pro-example-python-server-cluster(prod)
+       - Server Name: pro-python-prod-server-1
+       - Server IP: Your server IP
+       - SSH Port: Your SSH port (default: 22)
+  - Click "Create"
+
+![image](https://github.com/user-attachments/assets/88401434-6b03-4eed-bac2-deb93cb6e55b)
+
+> **Note**:
+> - Server names are prefixed with "pro-" to distinguish from standard version
+> - Ensure SSH access is properly configured for each server
+> - Multiple servers can be added to each cluster if needed
+
+
+#### 3.3 Import Space Server Clusters
+
+1. Locate the left navigation and select `Space Resources`, then choose `Server Cluster`.
+2. Switch to the space you created earlier, `python-example-space`.
+3. Click the "Import Server Clusters" button and select the existing server cluster from Global to import.
+
+Once imported, the space server cluster can be used as a selectable server cluster list for projects within the current space.
+
+![image](https://github.com/user-attachments/assets/c5400d77-af6e-4744-bf6c-2549476425c3)
+
+![image](https://github.com/user-attachments/assets/20bf9692-cc2d-431f-9269-290e6390d57a)
+
+### 4. Create Projects and Import Project Members
+
+#### 4.1 Development Project
+
+- Download project template: celerbuild-example-python-dev.yaml
+- Template source: [celerbuild-example-python dev template](https://github.com/celerbuild/celerbuild-example-python/blob/main/project-template/celerbuild-example-python-dev.yaml)
+
+![image](https://github.com/user-attachments/assets/e3465539-fbe3-481f-bce8-94aa8cfc1368)
+
+##### Import Template
+The imported project name, Space, and server cluster need to be changed, and others need to be modified according to your own requirements
+
+1. Navigate to `Projects/Projects`
+2. Click "Import YAML"
+3. Upload the downloaded template
+4. Configure development project:
+   - Project name: "pro-celerbuild-example-python-dev"
+   - Select cluster: "pro-example-python-server-cluster(dev)"
+   - The development environment can choose not to enable deployment approval (It is off by default)
+5. Click "Create Project"
+
+![image](https://github.com/user-attachments/assets/1e3b92c5-12d9-4da2-892c-fdce497abeec)
+
+![image](https://github.com/user-attachments/assets/cd2e24ca-3058-461a-9a30-6e9140a80341)
+
+![image](https://github.com/user-attachments/assets/271cb49c-7986-4e46-8076-3b927f3e284f)
+
+##### Import Project Members
+1. In the newly created project, find `Members` under the `Actions` menu and click to import project members.
+2. Click "Import Members" to add project members.
+3. After importing, assign specific roles to the members:
+      - Set Tom as the Project Owner
+      - Set Jerry as the Project Master
+      - Set Bob as the Developer
+
+![image](https://github.com/user-attachments/assets/380b592c-ea63-4456-895b-91cafd5b7698)
+
+![image](https://github.com/user-attachments/assets/457b0299-f149-4d51-a160-f26b5119d60e)
+
+![image](https://github.com/user-attachments/assets/df27f20e-a4a4-477d-82bb-ae648ed5c02e)
+
+![image](https://github.com/user-attachments/assets/fdc7f7cd-531a-4c59-9583-5e8945ea90f6)
+
+![image](https://github.com/user-attachments/assets/38ea62bb-3072-4f51-9be2-a7cd0808910e)
+
+#### 4.2 Production Project
+
+##### Download Template
+
+- Download project template: celerbuild-example-python-prod.yaml
+- Template source: [celerbuild-example-python prod template](https://github.com/celerbuild/celerbuild-example-python/blob/main/project-template/celerbuild-example-python-prod.yaml)
+
+##### Import Template
+
+The imported project name and server cluster need to be changed, and others need to be modified according to your own requirements
+
+1. Navigate to `Projects/Projects`
+2. Click "Import YAML"
+3. Upload the downloaded template
+4. Configure production project:
+      - Project name: "pro-celerbuild-example-python-prod"
+      - Select cluster: "pro-example-python-server-cluster(prod)"
+5. Click "Create Project"
+6. Enable deployment approval requirement
+
+![image](https://github.com/user-attachments/assets/631cf07d-f660-4947-914c-a8d3d7b689fd)
+
+![image](https://github.com/user-attachments/assets/589cd548-818a-46c4-8962-2b761279dcae)
+
+![image](https://github.com/user-attachments/assets/7bfa8c9b-c857-43b5-9d1c-ee55b2c297eb)
+
+##### Import Project Members
+1. In the newly created project, find `Members` under the `Actions` menu and click to import project members.
+2. Click "Import Members" to add project members.
+3. After importing, assign specific roles to the members:
+      - Set Tom as the Project Owner
+      - Set Jerry as the Project Master
+      - Set Bob as the Developer
+
+![image](https://github.com/user-attachments/assets/0bb4629c-2a5e-42e4-a98b-90e51243fcbf)
+
+![image](https://github.com/user-attachments/assets/f53b0ea5-a3e9-4725-9414-a3283aa260d0)
+
+![image](https://github.com/user-attachments/assets/5a5e4509-4e94-44cc-8eaa-36f5f797d8d7)
+
+![image](https://github.com/user-attachments/assets/d6720517-ce7e-45bf-8b8a-3eb1783a617a)
+
+![image](https://github.com/user-attachments/assets/fce69aa9-71d4-4ee1-9a03-f213a69559da)
+
+> **Note**:
+> - Development project allows direct deployment without approval
+> - Production project requires approval from Project Owner (Tom) or Project Master (Jerry)
+> - Make sure to review project settings before creation
+
+
+## Deployment Workflows
+
+### Development Environment
+> Note: Development environment deployments don't require approval
+
+#### Developer Role (Developer A or B)
+1. Create deployment application
+2. Execute deployment directly
+3. Monitor deployment status
+
+### Production Environment
+
+#### 1. Regular Deployment
+
+Developer Role (Developer A or B):
+- Create deployment application
+- Fill in deployment details
+- Submit for review
+- Execute approved deployment after review
+- Monitor deployment process
+
+Project Owner/Master Role (Leader/Developer A):
+- Review deployment application
+- Approve/Reject with comments
+- Monitor deployment status
+
+#### 2. Rollback Deployment
+Developer Role (Developer A or B):
+- Create rollback application
+- Select version to rollback
+- Submit for review
+- Execute approved rollback after review
+- Monitor rollback process
+
+Project Owner/Master Role (Leader/Developer A):
+- Review rollback application
+- Approve/Reject with comments
+- Monitor rollback status
+
+> **Note**:
+> - The developer who creates the deployment/rollback application is responsible for executing it after approval
+> - Project Owner/Master can review and approve but typically don't execute the deployment/rollback
+> - This workflow ensures that the developer who initiated the change is also responsible for its execution
+
+## Example Deployment Scenarios
+
+### Scenario 1: Development Branch Deployment
+1. Developer B (Bob) creates deployment for dev environment:
+
+Navigate to `Operations/Applications`
+- Select the space `python-example-space`.
+- Select project "pro-celerbuild-example-python-dev"
+- Fill in:
+  - Title: "Deploy version update to Dev"
+  - Description: "Deploy version update to Dev.Branch: dev"
+- Select dev branch (click the branch sync icon, and select the latest version)
+- Click "Submit Application"
+
+![image](https://github.com/user-attachments/assets/4665dcb9-a5c4-45bd-bdd8-f260012b0675)
+
+![image](https://github.com/user-attachments/assets/e0ceb8cf-3272-4dae-88c9-bf1a5bd84beb)
+
+2. Developer B (Bob) executes deployment:
+
+Navigate to `Operations/Tasks`
+- Find the deployment task
+- Click "Deploy"
+- Click "Start Deploy"
+- Monitor deployment progress in Operation Logs
+
+![image](https://github.com/user-attachments/assets/6464a37f-c1f0-4f4d-a4e9-4f535676cdd2)
+
+![image](https://github.com/user-attachments/assets/50bef73a-893e-4ae5-b675-bf9df07a1242)
+
+![image](https://github.com/user-attachments/assets/4596ef22-653b-4d20-a19b-23e28fd84d83)
+
+3. Verify deployment:
+
+```bash
+# Check version endpoint
+curl http://server:8084/version
+{"version":"1.0.1"}
+
+# Check main endpoint
+curl http://server:8084/
+{"message":"Hello World from CelerBuild!"}
+```
+> **Note**:
+> - Replace "server" with your actual server IP address
+> - A response similar to `{"version":"1.0.1"}` indicates successful deployment
+> - If you cannot access the endpoint, check:
+>   - Server firewall settings
+>   - Port 8084 accessibility
+>   - Application running status
+
+
+### Scenario 2: Production Tag Deployment
+1. Developer B (Bob) creates deployment for prod environment:
+
+Navigate to `Operations/Applications`
+- Select project "pro-celerbuild-example-python-prod"
+- Fill in:
+      - Title: "Deploy v1.0.0 to Production"
+      - Description: "Deploy v1.0.0 to Production"
+- Submit for review
+
+![image](https://github.com/user-attachments/assets/4580e844-3192-4e8c-9957-ceeb730ad3b0)
+
+![image](https://github.com/user-attachments/assets/78967e8c-a0a0-4a70-b597-feab3069045c)
+
+> **Note**:
+> - Here we select v1.0.0 as an example
+> - The deployment process remains the same regardless of which tag version you select
+
+
+2. Developer A (Jerry) reviews and approves:
+* 1. After logging in, ensure the correct space is selected.
+* 2. Check the notification icon for new messages. You'll see a new ticket assigned to you; click "View Details".
+* 3. Click "Review", select "Approved", provide feedback, and finally click "Submit Review".
+
+![image](https://github.com/user-attachments/assets/ade24256-52f2-44e7-8455-fa54eaa7ed6b)
+
+![image](https://github.com/user-attachments/assets/84232bc2-9d62-4331-8842-2c17c3bf1fe5)
+
+3. Developer B (Bob) executes deployment:
+
+* 1. After logging in, ensure the correct space is selected.
+* 2. Check the notifications for new messages. You'll see your ticket has been reviewed and approved; click "View Details".
+* 3. In the ticket details, click the "Deploy" button.
+* 4. Navigate to the specific task page, click "Start Deployment" to begin the deployment.
+* 5. Monitor the logs and server status. If any issues arise, a prompt will provide guidance.
+
+![image](https://github.com/user-attachments/assets/94ffc46d-9345-4f8d-86cd-da39360203c9)
+
+![image](https://github.com/user-attachments/assets/9d8eab48-962d-48c3-81f5-2dfe8b5ef234)
+
+![image](https://github.com/user-attachments/assets/9ab8702e-d4a7-4d1a-b564-a9165cf7d277)
+
+![image](https://github.com/user-attachments/assets/efac5657-a330-4f09-b4df-18d760e10c4d)
+
+4. Verify deployment:
+```bash
+# Check version endpoint
+curl http://server:8084/version
+{"version":"1.0.0"}
+
+# Check main endpoint
+curl http://server:8084/
+{"message":"Hello World from CelerBuild!"}
+```
+
+## Rollback Operations
+
+> **Note**:
+> - Branch deployment rollback is not demonstrated here because the system only maintains the latest committed version
+> - We'll demonstrate rollback using tag deployments instead
+> - Rollback can only be performed to previously deployed tags in the system
+
+### Tag Deployment Rollback Example
+
+#### 1. Initial Deployment (v1.0.0)
+> For detailed deployment steps, refer to the [Production Tag Deployment](/deployment-examples/python-projects/fastapi-framework-pro#scenario-2-production-tag-deployment) section above.
+
+1. Developer B (Bob) creates deployment:
+
+Navigate to `Operations/Applications`
+- Select project "pro-celerbuild-example-python-prod"
+- Fill in:
+      - Title: "Initial Deploy v1.0.0"
+      - Description: "Initial production deployment:Version: v1.0.0"
+- Select tag "v1.0.0"
+- Submit for review
+
+2. Developer A (Jerry) reviews and approves
+3. Developer B (Bob) executes deployment
+4. Verify deployment:
+```bash
+curl http://server:8084/version
+{"version":"1.0.0"}
+```
+
+#### 2. Upgrade to v1.0.1
+> For detailed deployment steps, refer to the [Production Tag Deployment](/deployment-examples/python-projects/fastapi-framework-pro#scenario-2-production-tag-deployment) section above.
+
+1. Developer B (Bob) creates deployment:
+
+Navigate to `Operations/Applications`
+- Select project "pro-celerbuild-example-python-prod"
+- Fill in:
+    - Title: "Upgrade to v1.0.1"
+    - Description: "Production version upgrade: From v1.0.0 To v1.0.1"
+- Select tag "v1.0.1"
+- Submit for review
+
+
+2. Developer A (Jerry) reviews and approves
+3. Developer B (Bob) executes deployment
+
+4. Verify upgrade:
+```bash
+curl http://server:8084/version
+{"version":"1.0.1"}
+```
+
+#### 3. Rollback to v1.0.0
+1. Developer B (Bob) initiates rollback:
+
+Navigate to `Operations/Applications`
+- Find project
+- Click Actions → "Apply Rollback"
+- Fill in:
+    - Title: "Rollback from v1.0.1 to v1.0.0"
+    - Description: "Rolling back production version"
+- Select rollback version v1.0.0
+- Submit for review
+
+![image](https://github.com/user-attachments/assets/521481d9-5652-49c0-aed4-e33fe0411c9e)
+
+![image](https://github.com/user-attachments/assets/338320a3-bdd2-4d8c-96bd-e5c313bbcb99)
+
+2. Leader (Tom) reviews and approves:
+
+Navigate to `Operations/Applications`
+- Review rollback request
+- Select Review Status "Approved"
+- Add approval comments: "Rollback to v1.0.0 approved."
+- Click "Submit Review"
+
+![image](https://github.com/user-attachments/assets/e5fbc011-de3e-4752-97b7-c842f58c5c00)
+
+![image](https://github.com/user-attachments/assets/bc2331e3-893a-4b59-89db-4bdff78bc05b)
+
+
+> **Note**:
+> - Both Project Owner (Tom) and Project Master (Jerry) have permission to review rollback requests
+> - In this example, we demonstrate Tom reviewing the rollback for clarity of role responsibilities
+> - In practice, Jerry could also review and approve this rollback request
+
+3. Developer B (Bob) executes rollback:
+
+- Check the notifications for new messages. You'll see your ticket has been reviewed and approved; click "View Details".
+- Click "Rollback"
+- Click "Start Rollback"
+- Monitor rollback progress
+
+![image](https://github.com/user-attachments/assets/3a24b8d1-5b41-4d80-9c40-541714d75008)
+
+![image](https://github.com/user-attachments/assets/f51a88d2-1118-4ee4-874d-c897b8cf93a0)
+
+![image](https://github.com/user-attachments/assets/d21b9751-30ca-40c8-860a-8df8f4751af2)
+
+![image](https://github.com/user-attachments/assets/30e5c138-9cac-4945-bcf2-ae6e6a969690)
+
+4. Verify rollback:
+```bash
+curl http://server:8084/version
+{"version":"1.0.0"}
+```
+
+For detailed rollback instructions, see:
+- [Rollback Deployment](/user-guide/rollback-deployment#initiating-a-rollback)
+- [Execute Deployment Task](/user-guide/execute-deployment-task)
+
+Congratulations! You have successfully learned how to deploy FastAPI Framework using CelerBuild Pro Edition, including team-based deployment workflows, approval processes, and version management! 🎉

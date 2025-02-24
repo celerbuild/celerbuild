@@ -1,0 +1,7 @@
+{
+  "dependencies": "Dependencies",
+  "download": "Download",
+  "activation": "Activation",
+  "database-configuration": "Database Configuration",
+  "remote-sync-setup": "Remote Sync Setup"
+}

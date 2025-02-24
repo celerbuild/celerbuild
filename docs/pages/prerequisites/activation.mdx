@@ -1,0 +1,61 @@
+import { Callout } from 'nextra-theme-docs'
+
+# Software Activation
+
+After installing CelerBuild, you'll need to activate the software before proceeding with configuration.
+
+## Obtaining Activation Details
+
+1. Visit [CelerBuild Account Page](https://celerbuild.com/account)
+2. Log in with your account credentials
+3. Locate your activation information:
+    - Activation Email
+    - Activation Code
+
+<Callout type="info">
+    Make sure to use the exact email address associated with your CelerBuild account.
+</Callout>
+
+## Activating CelerBuild
+
+1. Access the CelerBuild dashboard
+```
+http://<your-host>:<port>/login
+   ```
+<Callout type="info">
+    Replace:
+    - `<your-host>` with your server's hostname or IP address (e.g., localhost, 192.168.1.100)
+    - `<port>` with your configured port number (default: 8666)
+</Callout>
+
+2. Log in with default credentials:
+```
+Username: admin
+Password: admin@12345
+   ```
+
+<Callout type="warning">
+    For security reasons, please change your password immediately after first login. You can change your password in Settings/Profile.
+</Callout>
+
+3. Navigate to Settings > Subscription
+4. Enter your activation details:
+    - Paste your Activation Email
+    - Paste your Activation Code
+5. Click "Activate" to complete the process
+
+
+## Verifying Activation
+
+After successful activation, you should see your subscription details:
+- Email address
+- Plan type:
+    - Version: Standard/Pro
+    - Period: Monthly/Annual
+- Expiry Date (UTC)
+
+## Next Steps
+
+Once activated, proceed with:
+1. [Database Configuration](./database-configuration)
+2. [Remote Sync Setup](./remote-sync-setup)

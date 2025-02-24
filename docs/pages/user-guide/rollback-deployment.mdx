@@ -1,0 +1,79 @@
+# Rollback Deployment
+
+This guide explains how to initiate a rollback deployment in CelerBuild when you need to revert to a previous version.
+
+> **Important**:
+> - Rollback supports both branch and tag rollbacks (this example demonstrates tag rollback)
+> - Rollback is only available for versions that were successfully deployed through CelerBuild
+> - Previous versions (branches or tags) that haven't been deployed through CelerBuild won't appear in the rollback list
+> - Branch rollback follows a similar process to tag rollback
+
+## When to Rollback
+
+Common scenarios for rollback:
+- Critical bugs in production
+- Performance issues
+- Data integrity problems
+- Unexpected behavior
+
+## Initiating a Rollback
+
+1. Navigate to `OPERATIONS/Applications` in the main menu
+
+2. Click on "Apply Rollback" to start a new rollback deployment ticket
+
+3. Fill in the required information:
+    - Title: Describe the rollback reason
+    - Description: Detail why rollback is necessary
+
+4. Sync and select the branch or tag to roll back to
+    - Only successfully deployed versions are available for selection
+    - The deployment history shows deployment status and details
+
+5. Select a reviewer (Pro version only):
+    - Choose one team member to review the rollback request
+    - Standard version: System automatically approves rollbacks
+
+6. Click "Submit Rollback" to create the rollback deployment request
+
+> **Note**: In the Standard version, rollbacks are automatically approved without manual review. The Pro version requires selecting a reviewer for additional rollback control and safety.
+
+![apply-rollback-1](https://github.com/user-attachments/assets/03db2797-0ca0-44bd-83c2-a6c46ac96865)
+![apply-rollback-2](https://github.com/user-attachments/assets/7bd77717-b175-44c6-bd91-3edbe3f4beb3)
+
+## After Submitting Rollback Request
+
+### Standard Version
+- After submitting the rollback request, you can find the rollback task directly in `Operations/Tasks`
+- Execute the rollback task immediately without review
+- The rollback execution process is similar to regular deployment tasks
+- For detailed execution steps, refer to [Execute Deployment Task](/user-guide/execute-deployment-task)
+
+### Pro Version
+- If review is enabled, the rollback task will be pending for reviewer approval
+- Only after reviewer approval can you find and execute the task in `Operations/Tasks`
+- Once approved, follow the same execution process as Standard Version
+- Task execution steps are identical to regular deployments
+
+> **Note**:
+> The main difference between Standard and Pro versions is the review requirement. Standard Version allows immediate execution, while Pro Version may require reviewer approval before execution.
+
+## Best Practices
+
+### Before Rollback
+- Verify the issue cannot be fixed with a forward deployment
+- Identify the last known good version from successful deployments
+- Document the reason for rollback
+- Choose an appropriate reviewer who understands the system impact
+
+### During Rollback
+- Monitor the rollback process
+- Keep stakeholders informed
+- Verify database compatibility
+- Follow up with reviewers if needed
+
+### After Rollback
+- Verify system functionality
+- Document the incident
+- Plan for forward fixes
+- Review and update deployment procedures if necessary

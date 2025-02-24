@@ -1,0 +1,7 @@
+{
+  "java-projects": "Java Projects",
+  "python-projects": "Python Projects",
+  "nodejs-projects": "Node.js Projects",
+  "go-projects": "Go Projects",
+  "php-projects": "PHP Projects"
+}

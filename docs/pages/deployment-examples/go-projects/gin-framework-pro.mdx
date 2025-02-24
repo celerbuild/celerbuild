@@ -1,0 +1,595 @@
+# Deploying Go Projects with CelerBuild Pro Using the Gin Framework Example
+
+This guide demonstrates how to deploy a Go project using CelerBuild Pro Version, covering branch deployment, tag deployment, and tag version rollback operations with multiple roles. We'll use the [celerbuild-example-go](https://github.com/celerbuild/celerbuild-example-go) project built with the Gin framework.
+
+> **Note**
+> This tutorial uses the Pro Version. For Standard Version features, please refer to the [Standard Version Guide](/deployment-examples/go-projects/gin-framework).
+
+## Prerequisites
+
+### 1. System Prerequisites
+Complete all [Prerequisites](/prerequisites) setup steps
+
+### 2. Go Environment Setup
+
+#### Installing Go
+
+##### macOS
+```bash
+# Using Homebrew
+brew install go
+
+# Verify installation
+go version
+```
+
+##### Ubuntu/Debian
+```bash
+# Add the repository
+sudo add-apt-repository ppa:longsleep/golang-backports
+sudo apt update
+
+# Install Go
+sudo apt install golang-go
+
+# Verify installation
+go version
+```
+
+##### CentOS/RHEL
+```bash
+# Install Go
+sudo yum install epel-release
+sudo yum install golang
+
+# Verify installation
+go version
+```
+
+#### Environment Variables
+Add these lines to your shell profile (~/.bashrc, ~/.zshrc, etc.):
+```bash
+# Go environment variables
+export GOPATH=$HOME/go
+export GOROOT=/usr/local/go  # This might vary based on installation method
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+```
+
+> **Note**:
+> - The deployment process uses [makefile](https://github.com/celerbuild/celerbuild-example-go/blob/dev/makefile) for testing and building
+> - Minimum Go version required: 1.16 or later
+> - After setting environment variables, run `source ~/.bashrc` (or your shell profile) to apply changes
+
+### 3. Build Tools Setup
+
+#### Installing Make Tool
+
+##### macOS
+```bash
+# make is included in Command Line Tools
+xcode-select --install
+
+# Verify installation
+make --version
+```
+
+##### Ubuntu/Debian
+```bash
+# make is usually pre-installed, if not:
+sudo apt update
+sudo apt install make
+
+# Verify installation
+make --version
+```
+
+##### CentOS/RHEL
+```bash
+# make is usually pre-installed, if not:
+sudo yum install make
+
+# Verify installation
+make --version
+```
+
+> **Note**:
+> - Most Unix-like systems (macOS, Linux) come with `make` pre-installed
+> - For macOS, if `make` is not found, installing Command Line Tools will include it
+> - The deployment process requires `make` for building and packaging operations
+
+## Role Setup and Permissions
+
+### 1. Team Structure
+- Leader (Tom): Admin + Space Owner + Project Owner
+    - Username: tom
+    - Email: tom@example.com
+
+- Developer A (Jerry): Project Master
+    - Username: jerry
+    - Email: jerry@example.com
+
+- Developer B (Bob): Developer
+    - Username: bob
+    - Email: bob@example.com
+
+### 2. Initial Setup Process (by Tom)
+
+#### 2.1 Create Users
+1. Navigate to `Base/Users`
+2. Create team members' accounts:
+```
+Create Jerry's account:
+- Username: jerry
+- Email: jerry@example.com
+
+Create Bob's account:
+- Username: bob
+- Email: bob@example.com
+   ```
+
+> **Note**:
+> - By default, there is an admin user
+> - You can promote yourself (Tom) to admin and then delete the default admin user
+> - At least one admin user must exist in the system at all times
+
+![create-user-1](https://github.com/user-attachments/assets/9216f24f-ff3b-4be2-a9e6-b29a23d4a0d8)
+
+![create-user-2](https://github.com/user-attachments/assets/d885eea8-968d-464f-a088-191afb6cfa5c)
+
+#### 2.2 Create Space
+1. Navigate to `Global/Spaces`
+2. Create new space:
+    - Name: go-example-space
+
+
+![create-space](https://github.com/user-attachments/assets/35731a5e-aeba-4789-883e-59370314eb2d)
+
+#### 2.3 Import Space Members
+
+Import members from the global user pool to ensure team members have access and can collaborate.
+
+1. Locate the space you just added.
+2. In the corresponding Actions menu, find and click the **Members** button.
+3. Click on **Import Members** to proceed with the import.
+
+![import-members](https://github.com/user-attachments/assets/3b75e4f8-4e8d-4206-9789-25e0dab272af)
+
+![space-members](https://github.com/user-attachments/assets/a51e846c-0f44-4555-b1ba-70fb43e905fa)
+
+#### 2.4 Set Space Owner
+
+Designate a member as the space owner, responsible for managing resources and permissions within the space.
+In this example, set Tom as the Space Owner.
+
+1. Locate the user named Tom.
+2. In the corresponding Actions menu, click **Edit**.
+3. Change his permissions to **Owner**.
+
+![set-space-owner](https://github.com/user-attachments/assets/bd9ce6dc-6672-42a0-b390-796423e8c0ab)
+
+### 3. Create Server Infrastructure
+
+#### 3.1 Create Server Clusters
+1. Navigate to `Global/Server Clusters`
+2. Create development cluster:
+    - Click "New"
+    - Fill in cluster details:
+        - Name: pro-example-go-server-cluster(dev)
+        - Select Environment: dev
+        - Select Status: Available
+    - Click "Create"
+
+![create-server-cluster](https://github.com/user-attachments/assets/3ade25f2-0020-440e-8166-a42b0806f6f2)
+
+3. Create production cluster:
+     - Click "New"
+     - Fill in cluster details:
+          - Name: pro-example-go-server-cluster(prod)
+          - Select Environment: prod
+          - Select Status: Available
+     - Click "Create"
+
+![create-server-cluster-prod](https://github.com/user-attachments/assets/63bb894e-290a-47fc-8a8d-d345ea39fac4)
+
+
+#### 3.2 Add Servers
+1. Navigate to `Global/Servers`
+2. Add development server:
+    - Click "New"
+    - Fill in server details:
+         - Select cluster: pro-example-go-server-cluster(dev)
+         - Server Name: pro-go-dev-server-1
+         - Server IP: Your server IP
+         - SSH Port: Your SSH port (default: 22)
+    - Click "Create"
+
+![create-server](https://github.com/user-attachments/assets/2fd5b7b0-2f64-40b3-a1a2-618d31288eed)
+
+3. Add production server:
+    - Click "New"
+    - Fill in server details:
+        - Select cluster: pro-example-go-server-cluster(prod)
+        - Server Name: pro-go-prod-server-1
+        - Server IP: Your server IP
+        - SSH Port: Your SSH port (default: 22)
+    - Click "Create"
+
+![create-prod-server](https://github.com/user-attachments/assets/184f6a68-4d52-40d2-9847-735c164228ac)
+
+> **Note**:
+> - Server names are prefixed with "pro-" to distinguish from standard version
+> - Ensure SSH access is properly configured for each server
+> - Multiple servers can be added to each cluster if needed
+
+#### 3.3 Import Space Server Clusters
+
+1. Locate the left navigation and select `Space Resources`, then choose `Server Cluster`.
+2. Switch to the space you created earlier, `go-example-space`.
+3. Click the "Import Server Clusters" button and select the existing server cluster from Global to import.
+
+Once imported, the space server cluster can be used as a selectable server cluster list for projects within the current space.
+
+![space-server-cluster](https://github.com/user-attachments/assets/1dda749d-d76a-48f0-b132-362982c400fa)
+
+![space-server-cluster-import-2](https://github.com/user-attachments/assets/1d8b9c8d-91bc-4b14-9eeb-f5a5ede37381)
+
+### 4. Create Projects and Import Project Members
+
+#### 4.1 Development Project
+
+##### Download Template
+- Download project template: celerbuild-example-go-dev.yaml
+- Template source: [celerbuild-example-go dev template](https://github.com/celerbuild/celerbuild-example-go/blob/main/project-template/celerbuild-example-go-dev.yaml)
+
+![Download Dev Template](https://github.com/user-attachments/assets/5ad1a5b0-1a71-4fa2-8dea-ef22d9ca9aa9)
+
+##### Import Template
+The imported project name, Space, and server cluster need to be changed, and others need to be modified according to your own requirements
+
+1. Navigate to `Projects/Projects`
+2. Click "Import YAML"
+3. Upload the downloaded template
+4. Configure development project:
+     - Project name: "pro-celerbuild-example-go-dev"
+     - Select cluster: "pro-example-go-server-cluster(dev)"
+     - The development environment can choose not to enable deployment approval (It is off by default)
+5. Click "Create Project"
+
+![create-project-1](https://github.com/user-attachments/assets/fe5d6480-1bff-4d71-8ff2-7c4584cb69f8)
+
+![create-project-2](https://github.com/user-attachments/assets/3fe3b6c6-2fed-40b9-9ff8-e6841fa82c5a)
+
+##### Import Project Members
+1. In the newly created project, find `Members` under the `Actions` menu and click to import project members.
+2. Click "Import Members" to add project members.
+3. After importing, assign specific roles to the members:
+    - Set Tom as the Project Owner
+    - Set Jerry as the Project Master
+    - Set Bob as the Developer
+
+![add-project-members](https://github.com/user-attachments/assets/e9daf70d-3a4d-4f01-8629-1fefcf3c7039)
+
+![import-project-members](https://github.com/user-attachments/assets/808a8140-6c19-482c-a280-6f8a7377d416)
+
+![set-project-owner](https://github.com/user-attachments/assets/48f196c7-d846-44ee-8792-70fc1e0012c6)
+
+![set-project-master](https://github.com/user-attachments/assets/305f38cc-15c8-4767-8ea4-ab45c2fcc4ce)
+
+![image](https://github.com/user-attachments/assets/26cd1492-1e5e-4f91-85ea-839eb0d5c103)
+
+#### 4.2 Production Project
+
+##### Download Template
+- Download project template: celerbuild-example-go-prod.yaml
+- Template source: [celerbuild-example-go prod template](https://github.com/celerbuild/celerbuild-example-go/blob/main/project-template/celerbuild-example-go-prod.yaml)
+
+![Download Prod Template](https://github.com/user-attachments/assets/e1d3275a-8716-40ab-82c1-b75c8f2e809b)
+
+##### Import Template
+
+The imported project name and server cluster need to be changed, and others need to be modified according to your own requirements
+
+1. Navigate to `Projects/Projects`
+2. Click "Import YAML"
+3. Upload the downloaded template
+4. Configure production project:
+    - Project name: "pro-celerbuild-example-go-prod"
+    - Select cluster: "pro-example-go-server-cluster(prod)"
+5. Click "Create Project"
+6. Enable deployment approval requirement
+
+![create-project-pro-prod-1](https://github.com/user-attachments/assets/a0869ec1-9404-4fba-a411-1a101dc9c711)
+
+![create-project-pro-prod-2](https://github.com/user-attachments/assets/a0821fa4-5a6a-479e-b5ae-2b44a620d86e)
+
+
+##### Import Project Members
+1. In the newly created project, find `Members` under the `Actions` menu and click to import project members.
+2. Click "Import Members" to add project members.
+3. After importing, assign specific roles to the members:
+     - Set Tom as the Project Owner
+     - Set Jerry as the Project Master
+     - Set Bob as the Developer
+
+![pro-import-members-1](https://github.com/user-attachments/assets/9b56a88d-b05c-4d2c-9d56-c871770e2e24)
+
+![import-pro-project-members-2](https://github.com/user-attachments/assets/c66b3c66-9b06-4bcc-9cab-f9cff57c1feb)
+
+![import-project-member-set-owner](https://github.com/user-attachments/assets/670271f3-8bc7-4098-b419-2fffb33539c8)
+
+![pro-set-master](https://github.com/user-attachments/assets/00ac0147-7399-4424-9862-89f1a41c01e8)
+
+> **Note**:
+> - Development project allows direct deployment without approval
+> - Production project requires approval from Project Owner (Tom) or Project Master (Jerry)
+> - Project templates can be found in the [example repository](https://github.com/celerbuild/celerbuild-example-go/tree/main/project-template)
+> - Make sure to review project settings before creation
+
+## Deployment Workflows
+
+### Development Environment
+> Note: Development environment deployments don't require approval
+
+#### Developer Role (Developer A or B)
+1. Create deployment application
+2. Execute deployment directly
+3. Monitor deployment status
+
+### Production Environment
+
+#### 1. Regular Deployment
+
+Developer Role (Developer A or B):
+    - Create deployment application
+    - Fill in deployment details
+    - Submit for review
+    - Execute approved deployment after review
+    - Monitor deployment process
+
+Project Owner/Master Role (Leader/Developer A):
+    - Review deployment application
+    - Approve/Reject with comments
+    - Monitor deployment status
+
+#### 2. Rollback Deployment
+Developer Role (Developer A or B):
+    - Create rollback application
+    - Select version to rollback
+    - Submit for review
+    - Execute approved rollback after review
+    - Monitor rollback process
+
+Project Owner/Master Role (Leader/Developer A):
+    - Review rollback application
+    - Approve/Reject with comments
+    - Monitor rollback status
+
+> **Note**:
+> - The developer who creates the deployment/rollback application is responsible for executing it after approval
+> - Project Owner/Master can review and approve but typically don't execute the deployment/rollback
+> - This workflow ensures that the developer who initiated the change is also responsible for its execution
+
+## Example Deployment Scenarios
+
+### Scenario 1: Development Branch Deployment
+1. Developer B (Bob) creates deployment for dev environment:
+
+Navigate to `Operations/Applications`
+    - Select the space `go-example-space`.
+    - Select project "pro-celerbuild-example-go-dev"
+    - Fill in:
+        - Title: "Deploy version update to Dev"
+        - Description: "Deploy version update to Dev.Branch: dev"
+    - Select dev branch (click the branch sync icon, and select the latest version)
+    - Click "Submit Application"
+
+![application-dev-1](https://github.com/user-attachments/assets/3e8b2df0-9c0c-4107-807f-a33a959f1fcc)
+
+![application-dev-2](https://github.com/user-attachments/assets/59f6eba6-a4ab-4bb7-aa4c-17db57ce5de2)
+
+2. Developer B (Bob) executes deployment:
+
+Navigate to `Operations/Tasks`
+- Find the deployment task
+- Click "Deploy"
+- Click "Start Deploy"
+- Monitor deployment progress in Operation Logs
+
+![image](https://github.com/user-attachments/assets/e490ad8f-9888-44ef-9fc0-957d98c0bb1a)
+
+![task-pro](https://github.com/user-attachments/assets/7b5fad21-d01d-4af9-a293-4ae390ca4ba5)
+
+3. Verify deployment:
+```bash
+# Check version endpoint
+curl http://server:8080/version
+{"version":"1.0.9"}
+
+# Check main endpoint
+curl http://server:8080/
+{"message":"Hello World from CelerBuild!"}
+```
+> **Note**:
+> - Replace "server" with your actual server IP address
+> - A response similar to `{"version":"1.0.9"}` indicates successful deployment
+> - If you cannot access the endpoint, check:
+>   - Server firewall settings
+>   - Port 8080 accessibility
+>   - Application running status
+
+
+### Scenario 2: Production Tag Deployment
+1. Developer B (Bob) creates deployment for prod environment:
+
+Navigate to `Operations/Applications`
+    - Select project "pro-celerbuild-example-go-prod"
+    - Fill in:
+        - Title: "Deploy v1.0.5 to Production"
+        - Description: "Updating production version to v1.0.5"
+    - Submit for review
+
+![pro-prod-application-1](https://github.com/user-attachments/assets/45cf7a37-b54d-43a5-bb84-04c97c01ed52)
+
+![pro-prod-application-2](https://github.com/user-attachments/assets/0c993d9c-4fe2-4ed2-94f6-c349ed7036a2)
+
+> **Note**:
+> - Here we select v1.0.5 as an example
+> - For testing rollback operations, you can:
+>   1. First deploy v1.0.5 (refer to [Rollback Operations](#rollback-operations))
+>   2. Then deploy v1.0.6
+>   3. Finally perform rollback to v1.0.5
+> - The deployment process remains the same regardless of which tag version you select
+
+
+2. Developer A (Jerry) reviews and approves:
+* 1. After logging in, ensure the correct space is selected.
+* 2. Check the notification icon for new messages. You'll see a new ticket assigned to you; click "View Details".
+* 3. Click "Review", select "Approved", provide feedback, and finally click "Submit Review".
+
+
+![image](https://github.com/user-attachments/assets/0052e4a1-d5db-4688-844a-c6f94be7a203)
+
+![review-tag-ticket-2](https://github.com/user-attachments/assets/cf9d0480-e4e2-469e-a207-e67979668d3a)
+
+3. Developer B (Bob) executes deployment:
+
+* 1. After logging in, ensure the correct space is selected.
+* 2. Check the notifications for new messages. You'll see your ticket has been reviewed and approved; click "View Details".
+* 3. In the ticket details, click the "Deploy" button.
+* 4. Navigate to the specific task page, click "Start Deployment" to begin the deployment.
+* 5. Monitor the logs and server status. If any issues arise, a prompt will provide guidance.
+
+
+![ticket-approved-1](https://github.com/user-attachments/assets/890c25d0-c23d-45a0-ae96-1df022fa3521)
+
+![image](https://github.com/user-attachments/assets/0d90a1e2-e35b-40d7-841b-ec1fbe7b45f6)
+
+![ticket-approved-3](https://github.com/user-attachments/assets/57ce6d30-2cb1-4d92-a228-d280ebd3099b)
+
+4. Verify deployment:
+```bash
+# Check version endpoint
+curl http://server:8080/version
+{"version":"1.0.5"}
+
+# Check main endpoint
+curl http://server:8080/
+{"message":"Hello World from CelerBuild!"}
+```
+
+## Rollback Operations
+
+> **Note**:
+> - Branch deployment rollback is not demonstrated here because the system only maintains the latest committed version
+> - We'll demonstrate rollback using tag deployments instead
+> - Rollback can only be performed to previously deployed tags in the system
+
+### Tag Deployment Rollback Example
+
+#### 1. Initial Deployment (v1.0.5)
+> For detailed deployment steps, refer to the [Production Tag Deployment](/deployment-examples/go-projects/gin-framework-pro#scenario-2-production-tag-deployment) section above.
+
+1. Developer B (Bob) creates deployment:
+
+Navigate to `Operations/Applications`
+- Select project "pro-celerbuild-example-go-prod"
+- Fill in:
+  Title: "Initial Deploy v1.0.5"
+  Description: "Initial production deployment:
+  - Version: v1.0.5
+  - Base version for testing rollback
+  - All endpoints tested in development"
+- Select tag "v1.0.5"
+- Submit for review
+
+2. Developer A (Jerry) reviews and approves
+3. Developer B (Bob) executes deployment
+4. Verify deployment:
+```bash
+curl http://server:8080/version
+{"version":"1.0.5"}
+```
+
+#### 2. Upgrade to v1.0.6
+> For detailed deployment steps, refer to the [Production Tag Deployment](/deployment-examples/go-projects/gin-framework-pro#scenario-2-production-tag-deployment) section above.
+
+
+1. Developer B (Bob) creates deployment:
+
+Navigate to `Operations/Applications`
+- Select project "pro-celerbuild-example-go-prod"
+- Fill in:
+    - Title: "Upgrade to v1.0.6"
+    - Description: "Production version upgrade: From v1.0.5 To v1.0.6"
+- Select tag "v1.0.6"
+- Submit for review
+
+
+2. Developer A (Jerry) reviews and approves
+3. Developer B (Bob) executes deployment
+
+![deployment-release](https://github.com/user-attachments/assets/0c426ec0-cc45-467f-912a-912a80eda00e)
+
+4. Verify upgrade:
+```bash
+curl http://server:8080/version
+{"version":"1.0.6"}
+```
+
+#### 3. Rollback to v1.0.5
+1. Developer B (Bob) initiates rollback:
+
+Navigate to `Operations/Applications`
+- Find project
+- Click Actions → "Apply Rollback"
+- Fill in:
+    - Title: "Rollback from v1.0.6 to v1.0.5"
+    - Description: "Rolling back production version"
+- Select rollback version v1.0.5
+- Submit for review
+
+![pro-apply-rollback-1](https://github.com/user-attachments/assets/dd8dc54d-05b7-4a1c-9243-4120b4560637)
+
+![pro-apply-rollback-2](https://github.com/user-attachments/assets/3f8d9b72-871b-42a8-9c0a-8000263f93a3)
+
+2. Leader (Tom) reviews and approves:
+
+Navigate to `Operations/Applications`
+- Review rollback request
+- Select Review Status "Approved"
+- Add approval comments: "Rollback to v1.0.5 approved."
+- Click "Submit Review"
+
+![pro-review-rollback-ticket-1](https://github.com/user-attachments/assets/bcef3649-4ec6-4fbb-b8fc-62f8019a547f)
+
+![pro-review-rollback-ticket-2](https://github.com/user-attachments/assets/029c3daa-98a3-4a8f-803a-a398b4a93822)
+
+> **Note**:
+> - Both Project Owner (Tom) and Project Master (Jerry) have permission to review rollback requests
+> - In this example, we demonstrate Tom reviewing the rollback for clarity of role responsibilities
+> - In practice, Jerry could also review and approve this rollback request
+
+3. Developer B (Bob) executes rollback:
+
+- Check the notifications for new messages. You'll see your ticket has been reviewed and approved; click "View Details".
+- Click "Rollback"
+- Click "Start Rollback"
+- Monitor rollback progress
+
+![pro-review-rollback-ticket-3](https://github.com/user-attachments/assets/ca5c0085-42fb-435e-b910-0ca441d8e8e1)
+
+![pro-review-rollback-ticket-4](https://github.com/user-attachments/assets/ce6447bd-88b9-4f60-9edd-287213595b00)
+
+![pro-review-rollback-ticket-5](https://github.com/user-attachments/assets/d83470ce-cc3b-42dc-b204-052c36e3fd41)
+
+4. Verify rollback:
+```bash
+curl http://server:8080/version
+{"version":"1.0.5"}
+```
+
+For detailed rollback instructions, see:
+- [Rollback Deployment](/user-guide/rollback-deployment#initiating-a-rollback)
+- [Execute Deployment Task](/user-guide/execute-deployment-task)
+
+Congratulations! You have successfully learned how to deploy Gin Framework using CelerBuild Pro Edition, including team-based deployment workflows, approval processes, and version management! 🎉

@@ -1,0 +1,318 @@
+# Deploying Node.js Projects with CelerBuild Using the Express Framework Example
+
+This guide demonstrates how to deploy a Node.js application using CelerBuild, with Express framework as an example.
+
+## Prerequisites
+
+### 1. System Prerequisites
+Complete all [Prerequisites](/prerequisites) setup steps.
+
+### 2. Node.js Environment Setup
+
+#### Installing Node.js and npm
+
+##### macOS
+```bash
+# Using Homebrew
+brew install node
+
+# Verify installation
+node --version
+npm --version
+```
+
+##### Ubuntu/Debian
+```bash
+# Update package list
+sudo apt update
+
+# Install Node.js and npm
+sudo apt install nodejs npm
+
+# Verify installation
+node --version
+npm --version
+```
+
+##### CentOS/RHEL
+```bash
+# Install Node.js repository
+curl -fsSL https://rpm.nodesource.com/setup_lts.x | sudo bash -
+
+# Install Node.js and npm
+sudo yum install nodejs
+
+# Verify installation
+node --version
+npm --version
+```
+
+### 3. PM2 Setup
+
+#### Installing PM2
+
+```bash
+# Install PM2 globally
+sudo npm install -g pm2
+
+# Verify installation
+pm2 --version
+
+# Setup PM2 to start on system boot
+pm2 startup
+```
+
+## Branch Deployment (Development Environment)
+
+### 1. Create Server Infrastructure
+
+#### Create Server Cluster
+- Navigate to `Global/Server Clusters`
+- Create a cluster named "example-nodejs-server-cluster(dev)"
+
+![nodejs-example-new-server-cluster](https://github.com/user-attachments/assets/e001a105-29c6-47bf-a934-f9f810f8acb6)
+
+#### Add Server
+- Navigate to the `Global/Servers` section or go to the `Actions` menu of the newly created `example-nodejs-server-cluster(dev)` and select "Servers"
+- Select cluster "example-nodejs-server-cluster(dev)"
+- Fill in:
+  - Server Name
+  - Server IP
+  - SSH Port (default: 22)
+
+![nodejs-example-add-server](https://github.com/user-attachments/assets/a66113ec-bf6a-4b32-a14e-86b2d06849fd)
+
+### 2. Import Project Template
+
+#### Download Template
+- Download project template: celerbuild-example-nodejs-dev.yaml
+- Template source: [celerbuild-example-nodejs dev template](https://github.com/celerbuild/celerbuild-example-nodejs/blob/main/project-template/celerbuild-example-nodejs-dev.yaml)
+
+![image](https://github.com/user-attachments/assets/2e41385a-11e3-4006-a78b-5bacaeadb63f)
+
+#### Import Template
+- Navigate to `Projects/Projects`
+- Click "Import YAML"
+- Upload the downloaded template
+
+![image](https://github.com/user-attachments/assets/50cf0de6-234b-4ccc-804a-c8c966b60c12)
+
+#### Create Project
+- Review and confirm project settings
+- Click "Create Project" to finish
+
+> Note: This example uses Ubuntu system with `ubuntu` user. Please adjust the Deployment Configuration (Target Deployment Path, Target Repository Path, Deployment User, etc.) according to your actual environment.
+
+![image](https://github.com/user-attachments/assets/467aa497-fdc6-4680-beaf-97bf635f4954)
+
+![image](https://github.com/user-attachments/assets/f0592f62-bcee-4894-87d3-090422a57580)
+
+
+### 3. Initiating Deployment
+1. Go to `Operations/Applications`
+2. Select project "celerbuild-example-go-dev"
+3. Fill in Title and Description
+4. Click sync icon next to "Branch" and select latest dev branch
+5. Click "Submit Application"
+
+![image](https://github.com/user-attachments/assets/eae8bdc4-4bec-491a-b802-878993d80d4a)
+
+![image](https://github.com/user-attachments/assets/ba3a9b67-fb47-4500-a922-2913ff8e7086)
+
+For detailed steps, see [Creating Deployment](/user-guide/creating-deployment)
+
+### 4. Executing Deployment
+1. In `Operations/Tasks`, find your project task
+2. Click "Deploy" button
+3. On the task page, click "Start Deploy"
+4. Monitor Server Status and Operation Logs
+5. If issues occur, check error messages and retry deployment after fixing
+
+![image](https://github.com/user-attachments/assets/3a4cdf7f-3b1c-47f3-99ec-fd038c90f047)
+
+![image](https://github.com/user-attachments/assets/58500dd3-1535-41c7-96a1-4024643cf97e)
+
+![image](https://github.com/user-attachments/assets/ba6bb17e-ca4b-4083-8e1b-cc98e874d776)
+
+For detailed steps, see [Execute Deployment Task](/user-guide/execute-deployment-task)
+
+### 5. Verification
+Access `http://server:8082/version` (replace "server" with your server address)
+
+```bash
+# Example command
+➜  ~ curl http://server:8082/version
+
+# Expected response
+{"version":"1.0.0"}
+```
+
+> **Note**:
+> - Replace "server" with your actual server IP address
+> - A response similar to `{"version":"1.0.0"}` indicates successful deployment
+> - If you cannot access the endpoint, check:
+>   - Server firewall settings
+>   - Port 8082 accessibility
+>   - Application running status
+
+## Tag Deployment
+
+### 1. Create Server Infrastructure
+
+#### Create Server Cluster
+- Navigate to `Global/Server Clusters`
+- Create a cluster named "example-nodejs-server-cluster(prod)"
+
+![image](https://github.com/user-attachments/assets/f3a433f7-32e3-4316-a26b-6b6e94d97a51)
+
+#### Add Server
+- Navigate to the `Global/Servers` section or go to the `Actions` menu of the newly created `example-nodejs-server-cluster(prod)` and select "Servers"
+
+- Select cluster "example-nodejs-server-cluster(prod)"
+- Fill in:
+  - Server Name
+  - Server IP
+  - SSH Port (default: 22)
+
+
+![image](https://github.com/user-attachments/assets/6f5060c3-1b7c-4477-89a7-07e44132cc07)
+
+### 2. Import Project Template
+
+#### Download Template
+- Download project template: celerbuild-example-nodejs-prod.yaml
+- Template source: [celerbuild-example-nodejs prod template](https://github.com/celerbuild/celerbuild-example-nodejs/blob/main/project-template/celerbuild-example-nodejs-prod.yaml)
+
+![image](https://github.com/user-attachments/assets/2f978186-e344-41cd-a050-1994252d1497)
+
+#### Import Template
+- Navigate to `Projects/Projects`
+- Click "Import YAML"
+- Upload the downloaded template
+
+![image](https://github.com/user-attachments/assets/9ddd12ef-0f03-4c94-bf2b-dc0e20880b14)
+
+#### Create Project
+- Review and confirm project settings
+- Click "Create Project" to finish
+
+![image](https://github.com/user-attachments/assets/b4ecfd49-e485-4036-a46a-3b595239fa14)
+
+![image](https://github.com/user-attachments/assets/63c60bb8-f8d0-4def-9e20-d45712148d1d)
+
+### 3. Initiating Deployment
+1. Go to `Operations/Applications`
+2. Select project "celerbuild-example-nodejs-prod" and Click "Apply Deploy"
+3. Fill in Title and Description
+4. Click sync icon next to "Tag" and select latest tag
+5. Click "Submit Application"
+
+![image](https://github.com/user-attachments/assets/a6c821e9-3526-49a7-9c92-934bf63e02ee)
+
+![image](https://github.com/user-attachments/assets/e7fb81d4-3709-4bca-8014-da76b979ce09)
+
+For detailed steps, see [Creating Deployment](/user-guide/creating-deployment)
+
+### 4. Executing Deployment
+Follow the same steps as branch deployment execution.
+
+![image](https://github.com/user-attachments/assets/a60e0b8d-4126-4468-9733-ca11b29d0caf)
+
+![image](https://github.com/user-attachments/assets/713038af-4f47-49dd-9f11-34e5d2b15351)
+
+### 5. Verification
+Access `http://server:8082/version` (replace "server" with your server address)
+
+```bash
+# Example command
+➜  ~ curl http://server:8082/version
+
+# Expected response
+{"version":"1.0.0"}
+```
+> **Note**:
+> - Replace "server" with your actual server IP address
+> - A response similar to `{"version":"1.0.0"}` indicates successful deployment
+> - If you cannot access the endpoint, check:
+>   - Server firewall settings
+>   - Port 8082 accessibility
+>   - Application running status
+
+## Rollback Operations
+
+> **Note**: Branch deployment rollback is not demonstrated here because the system only maintains the latest committed version. We'll demonstrate rollback using tag deployments instead.
+
+### Tag Deployment Rollback Example
+
+#### 1. Initial Deployment (v1.0.0)
+> For detailed deployment steps, refer to:
+> - [Initiating Deployment](/deployment-examples/nodejs-projects/express-framework#3-initiating-deployment-1)
+> - [Executing Deployment](/deployment-examples/nodejs-projects/express-framework#3-initiating-deployment-1)
+
+1. Go to `Operations/Applications`
+2. Select project "celerbuild-example-nodejs-prod"
+3. Fill in deployment information:
+      - Title: "Deploy v1.0.0"
+      - Description: "Initial deployment of v1.0.0"
+4. Click sync icon next to "Tag" and select "v1.0.0"
+5. Click "Submit Application"
+6. Execute deployment and verify:
+```bash
+curl http://server:8082/version
+{"version":"1.0.0"}
+```
+
+#### 2. Upgrade to v1.0.1
+> For detailed deployment steps, refer to:
+> - [Initiating Deployment](/deployment-examples/nodejs-projects/express-framework#3-initiating-deployment-1)
+> - [Executing Deployment](/deployment-examples/nodejs-projects/express-framework#3-initiating-deployment-1)
+
+1. Go to `Operations/Applications`
+2. Create new deployment
+3. Fill in deployment information:
+      - Title: "Upgrade to v1.0.1"
+      - Description: "Upgrading from v1.0.0 to v1.0.1"
+4. Select tag "v1.0.1"
+5. Submit and execute deployment
+6. Verify upgrade:
+
+```bash
+curl http://server:8082/version
+{"version":"1.0.1"}
+```
+
+#### 3. Rollback to v1.0.0
+1. In `Operations/Applications`, find your project
+2. Click Actions (three dots) and select "Apply Rollback"
+3. Fill in rollback information:
+      - Title: "Rollback to v1.0.0"
+      - Description: "Rolling back from v1.0.1 to v1.0.0"
+4. Click sync icon next to "Select Rollback Tag"
+5. Select "v1.0.0" from the available tags
+6. Click "Submit Rollback"
+
+![image](https://github.com/user-attachments/assets/c1e71f41-e60a-4e59-9a6c-a22d861c8a72)
+
+![image](https://github.com/user-attachments/assets/64430bc1-8be4-49e3-a6d2-7f8426dab33c)
+
+#### 4. Execute Rollback
+1. Go to `Operations/Tasks`
+2. Find your rollback task
+3. Click "Rollback" in Actions
+4. Click "Start Rollback" on the task page
+5. Monitor Server Status and Operation Logs
+6. Verify rollback success:
+
+```bash
+curl http://server:8082/version
+{"version":"1.0.0"}
+```
+![image](https://github.com/user-attachments/assets/5583af96-ce74-4655-95b9-8b24e6cdd0ba)
+
+![image](https://github.com/user-attachments/assets/1515a28e-9b75-4942-bcde-86b8b3b7f92e)
+
+For detailed rollback instructions, see:
+- [Rollback Deployment](/user-guide/rollback-deployment#initiating-a-rollback)
+- [Execute Deployment Task](/user-guide/execute-deployment-task)
+
+Congratulations! You have successfully learned how to deploy Express Framework using CelerBuild Standard Edition, including branch deployment, tag deployment, and tag version rollback operations! 🎉

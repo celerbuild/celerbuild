@@ -1,0 +1,349 @@
+# Deploying Go Projects with CelerBuild Using the Gin Framework Example
+
+This guide demonstrates how to deploy a Go project using CelerBuild Standard Version, including:
+- Branch deployment for development environment
+- Tag deployment for production environment
+- Tag version rollback operations
+
+We'll use the [celerbuild-example-go](https://github.com/celerbuild/celerbuild-example-go) project built with the Gin framework.
+
+> **Note**:
+> - This tutorial uses the Standard Version with the admin user
+> - For Pro Version features with multiple roles and approval process, please refer to the [Pro Version Guide](/deployment-examples/go-projects/gin-framework-pro)
+
+## Prerequisites
+
+### 1. System Prerequisites
+Complete all [Prerequisites](/prerequisites) setup steps
+
+### 2. Go Environment Setup
+
+#### Installing Go
+
+##### macOS
+```bash
+# Using Homebrew
+brew install go
+
+# Verify installation
+go version
+```
+
+##### Ubuntu/Debian
+```bash
+# Add the repository
+sudo add-apt-repository ppa:longsleep/golang-backports
+sudo apt update
+
+# Install Go
+sudo apt install golang-go
+
+# Verify installation
+go version
+```
+
+##### CentOS/RHEL
+```bash
+# Install Go
+sudo yum install epel-release
+sudo yum install golang
+
+# Verify installation
+go version
+```
+
+#### Environment Variables
+Add these lines to your shell profile (~/.bashrc, ~/.zshrc, etc.):
+```bash
+# Go environment variables
+export GOPATH=$HOME/go
+export GOROOT=/usr/local/go  # This might vary based on installation method
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+```
+
+> **Note**:
+> - The deployment process uses [makefile](https://github.com/celerbuild/celerbuild-example-go/blob/dev/makefile) for testing and building
+> - Minimum Go version required: 1.16 or later
+> - After setting environment variables, run `source ~/.bashrc` (or your shell profile) to apply changes
+
+### 3. Build Tools Setup
+
+#### Installing Make Tool
+
+##### macOS
+```bash
+# make is included in Command Line Tools
+xcode-select --install
+
+# Verify installation
+make --version
+```
+
+##### Ubuntu/Debian
+```bash
+# make is usually pre-installed, if not:
+sudo apt update
+sudo apt install make
+
+# Verify installation
+make --version
+```
+
+##### CentOS/RHEL
+```bash
+# make is usually pre-installed, if not:
+sudo yum install make
+
+# Verify installation
+make --version
+```
+
+> **Note**:
+> - Most Unix-like systems (macOS, Linux) come with `make` pre-installed
+> - For macOS, if `make` is not found, installing Command Line Tools will include it
+> - The deployment process requires `make` for building and packaging operations
+
+## Branch Deployment
+
+### 1. Create Server Infrastructure
+
+#### Create Server Cluster
+- Navigate to `Global/Server Clusters`
+- Create a cluster named "example-go-server-cluster(dev)"
+
+![Create Server Cluster](https://github.com/user-attachments/assets/103d9819-4746-4c4c-a50a-3b3e23c5683b)
+
+#### Add Server
+- Navigate to the `Global/Servers` section or go to the `Actions` menu of the newly created `example-go-server-cluster(dev)` and select "Servers"
+- Select cluster "example-go-server-cluster(dev)"
+- Fill in:
+    - Server Name
+    - Server IP
+    - SSH Port (default: 22)
+
+![Add Server](https://github.com/user-attachments/assets/74e1377c-6876-4d49-b634-f75696bce062)
+
+### 2. Import Project Template
+
+#### Download Template
+- Download project template: celerbuild-example-go-dev.yaml
+- Template source: [celerbuild-example-go dev template](https://github.com/celerbuild/celerbuild-example-go/blob/main/project-template/celerbuild-example-go-dev.yaml)
+
+![image](https://github.com/user-attachments/assets/5ad1a5b0-1a71-4fa2-8dea-ef22d9ca9aa9)
+
+#### Import Template
+- Navigate to `Projects/Projects`
+- Click "Import YAML"
+- Upload the downloaded template
+
+![Import Template](https://github.com/user-attachments/assets/aebc41f4-c8e0-4d01-abd3-2a1fb47ab965)
+
+#### Create Project
+- Review and confirm project settings
+- Click "Create Project" to finish
+
+![add-project-part-1](https://github.com/user-attachments/assets/adb068aa-6228-497c-9e07-6172b8680aae)
+
+![add-project-part-2](https://github.com/user-attachments/assets/ce3d6c61-f0ef-41d5-a2f1-7d657611df7b)
+
+### 3. Initiating Deployment
+1. Go to `Operations/Applications`
+2. Select project "celerbuild-example-go-dev"
+3. Fill in Title and Description
+4. Click sync icon next to "Branch" and select latest dev branch
+5. Click "Submit Application"
+
+![apply-deploy-part-1](https://github.com/user-attachments/assets/8ede609f-4be7-4d43-8e6f-0af6a89ba0e9)
+![apply-deploy-part-2](https://github.com/user-attachments/assets/9f56a1dc-b297-4593-be5f-dec0e61f477b)
+
+For detailed steps, see [Creating Deployment](/user-guide/creating-deployment)
+
+### 4. Executing Deployment
+1. In `Operations/Tasks`, find your project task
+2. Click "Deploy" button
+3. On the task page, click "Start Deploy"
+4. Monitor Server Status and Operation Logs
+5. If issues occur, check error messages and retry deployment after fixing
+
+![tasks-1](https://github.com/user-attachments/assets/ecd56e8f-3e28-46f1-820b-ad6f93812241)
+
+![tasks-2](https://github.com/user-attachments/assets/b8f15bfd-3831-48f5-9772-75b688520b77)
+
+![tasks-3](https://github.com/user-attachments/assets/d9b28e48-ddd4-40c1-8124-3cc36793fdc2)
+
+For detailed steps, see [Execute Deployment Task](/user-guide/execute-deployment-task)
+
+### 5. Verification
+Access `http://server:8080/version` (replace "server" with your server address)
+
+```bash
+# Example command
+➜  ~ curl http://server:8080/version
+
+# Expected response
+{"version":"1.0.9"}
+```
+
+> **Note**:
+> - Replace "server" with your actual server IP address
+> - A response similar to `{"version":"1.0.9"}` indicates successful deployment
+> - If you cannot access the endpoint, check:
+>   - Server firewall settings
+>   - Port 8080 accessibility
+>   - Application running status
+
+## Tag Deployment
+
+### 1. Create Server Infrastructure
+
+#### Create Server Cluster
+- Navigate to `Global/Server Clusters`
+- Create a cluster named "example-go-server-cluster(prod)"
+
+![prod-server-cluster](https://github.com/user-attachments/assets/2fc7590f-b599-4771-8b99-26e23102bc17)
+
+#### Add Server
+- Navigate to the `Global/Servers` section or go to the `Actions` menu of the newly created `example-go-server-cluster(prod)` and select "Servers"
+
+- Select cluster "example-go-server-cluster(prod)"
+- Fill in:
+    - Server Name
+    - Server IP
+    - SSH Port (default: 22)
+
+
+![Add Production Server](https://github.com/user-attachments/assets/c59cf0ef-d69c-4ef3-8be4-3de012c2b636)
+
+### 2. Import Project Template
+
+#### Download Template
+- Download project template: celerbuild-example-go-prod.yaml
+- Template source: [celerbuild-example-go prod template](https://github.com/celerbuild/celerbuild-example-go/blob/main/project-template/celerbuild-example-go-prod.yaml)
+
+![image](https://github.com/user-attachments/assets/e1d3275a-8716-40ab-82c1-b75c8f2e809b)
+
+#### Import Template
+- Navigate to `Projects/Projects`
+- Click "Import YAML"
+- Upload the downloaded template
+
+![Import Production Template](https://github.com/user-attachments/assets/18e4fa88-0806-4845-818b-39ca869b2953)
+
+#### Create Project
+- Review and confirm project settings
+- Click "Create Project" to finish
+
+![create-project-prod-1](https://github.com/user-attachments/assets/b776b9f3-8f4e-4b80-aa72-4543bbce8fbf)
+
+![create-project-prod-2](https://github.com/user-attachments/assets/794506fc-44f2-4e51-a179-4f6018ee02b2)
+
+### 3. Initiating Deployment
+1. Go to `Operations/Applications`
+2. Select project "celerbuild-example-go-prod" and Click "Apply Deploy"
+3. Fill in Title and Description
+4. Click sync icon next to "Tag" and select latest tag
+5. Click "Submit Application"
+
+![apply-deploy-1](https://github.com/user-attachments/assets/3e09dcf7-6a1c-4203-915e-021b69ab04a4)
+![apply-deploy-2](https://github.com/user-attachments/assets/1f7259ab-0de3-464e-ba66-33bb21e88f8b)
+
+For detailed steps, see [Creating Deployment](/user-guide/creating-deployment)
+
+### 4. Executing Deployment
+Follow the same steps as branch deployment execution.
+
+![prod-task-1](https://github.com/user-attachments/assets/9de56bc4-2bde-4b45-914a-d3053b3b22a8)
+![prod-task-3](https://github.com/user-attachments/assets/b368d74a-bd09-4b0d-8e19-39f342a7396c)
+
+### 5. Verification
+Access `http://server:8080/version` (replace "server" with your server address)
+
+```bash
+# Example command
+➜  ~ curl http://server:8080/version
+
+# Expected response
+{"version":"1.0.5"}
+```
+> **Note**:
+> - Replace "server" with your actual server IP address
+> - A response similar to `{"version":"1.0.5"}` indicates successful deployment
+> - If you cannot access the endpoint, check:
+>   - Server firewall settings
+>   - Port 8080 accessibility
+>   - Application running status
+
+## Rollback Operations
+
+> **Note**: Branch deployment rollback is not demonstrated here because the system only maintains the latest committed version. We'll demonstrate rollback using tag deployments instead.
+
+### Tag Deployment Rollback Example
+
+#### 1. Initial Deployment (v1.0.5)
+> For detailed deployment steps, refer to:
+> - [Initiating Deployment](/deployment-examples/go-projects/gin-framework#3-initiating-deployment-1)
+> - [Executing Deployment](/deployment-examples/go-projects/gin-framework#4-executing-deployment-1)
+
+1. Go to `Operations/Applications`
+2. Select project "celerbuild-example-go-prod"
+3. Fill in deployment information:
+     - Title: "Deploy v1.0.5"
+     - Description: "Initial deployment of v1.0.5"
+4. Click sync icon next to "Tag" and select "v1.0.5"
+5. Click "Submit Application"
+6. Execute deployment and verify:
+```bash
+curl http://server:8080/version
+{"version":"1.0.5"}
+```
+
+#### 2. Upgrade to v1.0.6
+> For detailed deployment steps, refer to:
+> - [Initiating Deployment](/deployment-examples/go-projects/gin-framework#3-initiating-deployment-1)
+> - [Executing Deployment](/deployment-examples/go-projects/gin-framework#4-executing-deployment-1)
+
+1. Go to `Operations/Applications`
+2. Create new deployment
+3. Fill in deployment information:
+     - Title: "Upgrade to v1.0.6"
+     - Description: "Upgrading from v1.0.5 to v1.0.6"
+4. Select tag "v1.0.6"
+5. Submit and execute deployment
+6. Verify upgrade:
+```bash
+curl http://server:8080/version
+{"version":"1.0.6"}
+```
+
+#### 3. Rollback to v1.0.5
+1. In `Operations/Applications`, find your project
+2. Click Actions (three dots) and select "Apply Rollback"
+3. Fill in rollback information:
+     - Title: "Rollback to v1.0.5"
+     - Description: "Rolling back from v1.0.6 to v1.0.5"
+4. Click sync icon next to "Select Rollback Tag"
+5. Select "v1.0.5" from the available tags
+6. Click "Submit Rollback"
+
+![apply-rollback-1](https://github.com/user-attachments/assets/d8ac47fc-f1d1-40c6-9f5f-b1a62100640f)
+![apply-rollback-2](https://github.com/user-attachments/assets/a1f70a3c-a7b0-46aa-9e7b-308c1503aa67)
+
+#### 4. Execute Rollback
+1. Go to `Operations/Tasks`
+2. Find your rollback task
+3. Click "Rollback" in Actions
+4. Click "Start Rollback" on the task page
+5. Monitor Server Status and Operation Logs
+6. Verify rollback success:
+```bash
+curl http://server:8080/version
+{"version":"1.0.5"}
+```
+![rollback-tasks-1](https://github.com/user-attachments/assets/1b420e0b-7303-45a7-aff7-7c5ca1e469c4)
+![rollback-tasks-2](https://github.com/user-attachments/assets/3517b7f9-218f-4cb7-84ab-e5fc6ae01446)
+
+For detailed rollback instructions, see:
+- [Rollback Deployment](/user-guide/rollback-deployment#initiating-a-rollback)
+- [Execute Deployment Task](/user-guide/execute-deployment-task)
+
+Congratulations! You have successfully learned how to deploy Gin Framework using CelerBuild Standard Edition, including branch deployment, tag deployment, and tag version rollback operations! 🎉

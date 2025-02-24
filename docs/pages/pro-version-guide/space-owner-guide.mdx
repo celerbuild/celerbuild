@@ -1,0 +1,70 @@
+# Space Owner Role in CelerBuild
+import { Callout } from 'nextra-theme-docs'
+
+As a Space Owner in CelerBuild, you have overall responsibility for managing your designated space and the projects within it.
+
+## Key Responsibilities
+
+1. Managing Space Resources
+     - Space Member Management
+     - Space Server Cluster Management
+2. Managing your space
+    - View the list of spaces you own
+    - Edit space name and description
+3. Managing projects within your space
+    - Creating projects
+    - Overseeing all projects in the space
+    - Having access to all project configurations
+
+## Managing Space Resources
+
+- **Space Member Management**:
+  - Import members from the Global user pool.
+  - Set roles (Owner, Member; multiple Owners allowed).
+  - Remove members. (Project members are imported from the current space's members.)
+
+![space-resources-members](https://github.com/user-attachments/assets/621fb5fe-493e-4758-a359-e40843a8a235)
+
+- **Space Server Cluster Management**:
+  - Import server clusters from the Global server cluster pool.
+  - Remove server clusters. (The project's server cluster selection list is based on the current space's server cluster pool.)
+
+![space-resources-server-clusters](https://github.com/user-attachments/assets/5e29db2e-4799-4f66-b23c-6179a6ae87a2)
+
+## Managing your space
+
+1. View the list of spaces you own:
+    - Click the space switch dropdown at the top.
+    - Click the "My Space" button to see the list of spaces where you are the owner.
+
+![space-manage](https://github.com/user-attachments/assets/552dfcf0-d9ee-44a1-911f-7884d1d22ca8)
+
+2. Edit a space:
+    - Click the space switch dropdown at the top.
+    - Click "My Space" to access the space list.
+    - Edit the name and description of your spaces.
+
+![my-space-edit](https://github.com/user-attachments/assets/4385735b-9277-4e35-92d9-b2e74d81f06c)
+
+## Creating and Managing Projects
+
+For detailed instructions on creating and managing projects, please refer to [Project Management Guide](/admin-guide/project-management#creating-projects) which covers:
+- Manual project creation
+- YAML configuration import
+- Project copying
+
+<Callout type="info">
+    While Space Owners have full access to all projects in their space, it's recommended to:
+    - Let Project Owners handle their project member management
+    - Focus on space-level oversight
+    - Maintain overall space organization
+</Callout>
+
+## Best Practices
+
+- Create clear project structures within your space
+- Use consistent naming conventions for projects
+- Ensure proper initial setup of new projects
+- Maintain overview of projects within your space
+- Delegate project-level management to Project Owners
+- Efficiently manage space resources, including members and server clusters

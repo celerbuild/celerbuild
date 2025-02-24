@@ -1,0 +1,110 @@
+# Project Management
+import { Callout } from 'nextra-theme-docs'
+
+<Callout type="info">
+    This guide describes project management for Standard Version where administrators manage all project aspects.
+
+    For Pro Version project management, please refer to the Pro Version Guide which includes additional roles like Space Owner, Project Owner, etc.
+</Callout>
+
+## Creating Projects
+
+You can create projects in three ways:
+
+![admin-project-create](https://github.com/user-attachments/assets/e20fb752-ba15-4f9a-8931-ea3fb2cafb93)
+
+### Method 1: Manual Creation
+
+1. Navigate to `Projects/Projects` in the main menu
+2. Click on "New" button
+3. Fill in the project details:
+    - Project Name
+    - Environment (dev/staging/prod)
+    - Space (default in standard version)
+    - Other project configurations
+4. Configure deployment settings:
+    - Git repository
+    - Deployment path
+    - Build commands
+    - Pre-deployment Commands (Optional)
+    - Post-deployment Commands (Optional)
+
+<Callout type="info">
+    For detailed project configuration options, please refer to [Project Configuration Guide](/user-guide/project-configuration) which covers:
+    - Project Information
+    - Repository Settings
+    - Deployment Configuration
+    - Deployment Commands
+</Callout>
+
+### Method 2: Import YAML
+
+1. Navigate to `Projects/Projects` in the main menu
+2. Click "Import YAML" button
+3. Select your YAML file
+4. Review and confirm the configuration
+
+### Method 3: Copy Existing Project
+
+1. Navigate to `Projects/Projects` in the main menu
+2. Find the project you want to copy
+3. Click the action menu (three dots)
+4. Select "Copy"
+5. The system will create a new project with the same configurations but a new name
+
+## Managing Projects
+
+### Viewing Projects
+
+1. Navigate to `Projects/Projects`
+2. Use the search bar to find specific projects
+3. Click "View" to see project details
+
+![admin-project-view](https://github.com/user-attachments/assets/7d5f92d6-f90c-4c65-8be9-f21f2a309e5f)
+
+### Editing Projects
+
+1. Select the project from the list
+2. Click "Edit" next to the project name
+3. Modify project settings as needed:
+    - Basic information
+    - Deployment configurations
+    - Build commands
+4. Save your changes
+
+![admin-project-edit](https://github.com/user-attachments/assets/a70bb2ac-3e07-4841-a6d8-4a1fbbbc0c57)
+
+### Exporting Project Configuration
+
+1. Navigate to `Projects/Projects`
+2. Find the project you want to export
+3. Click the action menu (three dots)
+4. Select "Export YAML"
+5. The YAML file will be automatically downloaded
+
+![admin-project-export-yaml](https://github.com/user-attachments/assets/92215ada-0761-4e23-aa63-f005e24881ac)
+
+### Deleting Projects
+
+1. Select the project from the list
+2. Click the action menu (three dots)
+3. Select "Delete"
+4. Confirm the deletion
+
+![admin-project-delete](https://github.com/user-attachments/assets/29a3526f-b8ac-4df0-96d7-11954752883b)
+
+<Callout type="warning">
+    Projects that are referenced by tickets cannot be deleted. You must first remove all ticket dependencies before deletion.
+</Callout>
+
+## Best Practices
+
+- Use clear and consistent project naming conventions
+- Regularly review and update project configurations
+- Document any changes to project settings
+- Back up important project configurations using YAML export
+- Test configuration changes in development environment first
+
+<Callout type="info">
+    For Pro Version features and role-based project management, please refer to the Pro Version Guide.
+</Callout>

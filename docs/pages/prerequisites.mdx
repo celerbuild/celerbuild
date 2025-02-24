@@ -1,26 +1,60 @@
+import { Steps } from 'nextra/components'
+import { Callout } from 'nextra-theme-docs'
+
 # Prerequisites
 
-Before you start using CelerBuild, you need to complete the following steps:
+Before you start using CelerBuild, you need to complete the following prerequisites.
 
-## 1. Install Dependencies
+<Steps>
 
-CelerBuild supports deployment on Linux and macOS environments. Please note that Windows deployment is not supported.
+    ### Install Dependencies
 
-The main dependencies include:
+    CelerBuild supports deployment on Linux and macOS environments. Windows deployment is not supported.
 
-* Installing MariaDB
-* Configuring SSH public key
+    The main dependencies include:
+    - MariaDB database
+    - SSH public key configuration
 
-For detailed installation steps and instructions, please refer to the [Dependency Installation Guide](./prerequisites/dependencies).
+    [Learn more about dependencies →](./prerequisites/dependencies)
 
-## 2. Download and Run CelerBuild
+    ### Download and Install
 
-After completing the dependency installation, you need to:
+    Download and install the CelerBuild binary:
+    - Get the latest version
+    - Set permissions
+    - Configure system service
 
-* Download the CelerBuild binary file from the official website
-* Set execution permissions
-* Run CelerBuild
+    [Download and install guide →](./prerequisites/download)
 
-For specific download and running instructions, please check the [Download and Run Guide](./prerequisites/download).
+    ### Activate CelerBuild
 
-Once you've completed these steps, you can start using CelerBuild. If you encounter any issues during the installation process, please refer to our FAQ or contact us.
+    Activate your CelerBuild installation:
+    - Get activation key
+    - Complete activation process
+    - Verify installation
+
+    [Activation instructions →](./prerequisites/activation)
+
+    ### Configure Database
+
+    Set up the database connection:
+    - MariaDB configuration
+    - Connection settings
+    - Database initialization
+
+    [Database configuration guide →](./prerequisites/database-configuration)
+
+    ### Setup Remote Sync
+
+    Configure remote synchronization:
+    - SSH key setup
+    - Remote server configuration
+    - Connection verification
+
+    [Remote sync setup guide →](./prerequisites/remote-sync-setup)
+
+</Steps>
+
+<Callout type="info">
+    Need technical support during installation? [Contact us](../community-and-support).
+</Callout>

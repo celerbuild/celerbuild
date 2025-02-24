@@ -1,0 +1,107 @@
+# User Management
+import { Callout } from 'nextra-theme-docs'
+
+<Callout type="info">
+    User management is a Pro Version feature. Standard Version only supports a single admin user.
+</Callout>
+
+
+This guide explains how to manage users in CelerBuild. Only administrators have access to these functions.
+
+## User List
+
+The user list displays all users in the system with the following information:
+- User ID
+- Username
+- Email
+- User Type (Admin/User)
+- Status (Active/Disabled)
+- Actions
+
+Users can be searched by username or email using the search bar.
+
+![global-user-overview](https://github.com/user-attachments/assets/47e99259-5f55-47d0-88a0-358d0d21f860)
+
+## Creating Users
+
+To create a new user:
+
+1. Click the "New" button in the top-right corner
+2. Fill in the required information:
+    - Username
+    - Email
+    - Password
+3. Click "Create" to add the user
+
+![create-user](https://github.com/user-attachments/assets/bf258641-9ab6-4031-8168-15dc46f4ba60)
+
+<Callout type="info">
+    New users are created with regular user permissions by default and "Active" status.
+</Callout>
+
+## Managing User Permissions
+
+### Promoting to Admin
+To grant admin privileges:
+1. Click the "⋮" button
+2. Select "Set as Admin"
+
+![set-as-admin](https://github.com/user-attachments/assets/7ae6db47-603f-45b9-afbb-c6a107fdc312)
+
+### Removing Admin Rights
+To remove admin privileges:
+1. Click the "⋮" button
+2. Select "Remove Admin"
+
+![remove-admin](https://github.com/user-attachments/assets/1297798c-0174-4e00-8e24-e6b77bee3d33)
+
+<Callout type="warning">
+    Be careful when managing admin rights. There should always be at least one admin user in the system.
+</Callout>
+
+## Managing User Status
+
+### Disabling Users
+To temporarily prevent a user from accessing the system:
+1. Click the "⋮" button
+2. Select "Disable User"
+
+![disable-user](https://github.com/user-attachments/assets/db074075-4d57-4feb-9455-f4d6cf0b2d9e)
+
+### Enabling Users
+To re-enable a disabled user:
+1. Click the "⋮" button
+2. Select "Enable User"
+
+![enabled-user](https://github.com/user-attachments/assets/c608aed5-2568-4abe-9620-d928e2dde322)
+
+## User Account Management
+
+### Reset Password
+To reset a user's password:
+1. Click the "⋮" button
+2. Select "Reset Password"
+3. Enter and confirm the new password
+4. Click "Save" to apply the changes
+
+![reset-password](https://github.com/user-attachments/assets/54e3ec9e-f303-42cb-ac99-fc4125512e0c)
+
+### Delete User
+To permanently remove a user:
+1. Click the "⋮" button
+2. Select "Delete"
+3. Confirm the deletion
+
+![delete-user](https://github.com/user-attachments/assets/dce0ee86-03f0-49d9-bf74-24e975795b73)
+
+<Callout type="warning">
+    User deletion is permanent and cannot be undone. Make sure to backup any important user data before deletion.
+</Callout>
+
+## Best Practices
+
+- Regularly review user accounts and permissions
+- Disable unused accounts instead of deleting them if you might need them later
+- Use clear username conventions
+- Keep admin privileges limited to necessary personnel only
+- Document any changes to user permissions

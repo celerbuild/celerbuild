@@ -1,0 +1,57 @@
+# Env Management
+import { Callout } from 'nextra-theme-docs'
+
+This guide explains how to manage environments in CelerBuild. Administrators have access to these management functions
+
+## Overview
+
+Environments represent different stages of the deployment process, such as development, testing, staging, and production. They help organize and manage deployment workflows.
+
+## Adding an Environment
+
+To add a new environment:
+
+1. Navigate to the "Environments" section in the admin panel
+2. Click the "New" button
+3. Fill in the required information:
+    - Name
+4. Click "Create" to add the environment
+
+![admin-create-env](https://github.com/user-attachments/assets/c10ce677-9d8b-43c8-97ae-9867e1f76bfe)
+
+<Callout type="info">
+    Use standard naming conventions like "dev", "test", "staging", and "prod" for clarity.
+</Callout>
+
+## Editing an Environment
+
+To edit an existing env:
+
+1. Select the environment from the list
+2. Click "Edit" next to the env name
+3. Modify the environment details as needed
+4. Click "Save" to apply changes
+
+![admin-edit-env](https://github.com/user-attachments/assets/c03631fd-91a6-43d1-b16e-9af84e2cda7a)
+
+## Deleting an Environment
+
+To delete an environment:
+
+1. Select the environment from the list
+2. Click "Delete" next to the env name
+3. Confirm the deletion
+
+![admin-delete-env](https://github.com/user-attachments/assets/7c865715-8240-409f-ba26-cdd7565248df)
+
+<Callout type="warning">
+    - Environments that are currently used by projects cannot be deleted. Ensure all dependencies are removed before attempting deletion.
+    - Deleting an env is permanent and will affect all associated deployment configurations.
+</Callout>
+
+## Best Practices
+
+- Use consistent naming conventions for environments
+- Regularly review and update environment configurations
+- Document any changes to environment settings
+

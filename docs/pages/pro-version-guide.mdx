@@ -1,0 +1,52 @@
+# Pro Version Guide
+import { Callout } from 'nextra-theme-docs'
+
+<Callout type="info">
+    This guide covers features and roles specific to CelerBuild Pro Version.
+
+    - For standard version features, please refer to the User Guide
+    - For administrator operations (both Standard and Pro version), please refer to the Admin Guide
+</Callout>
+
+## Role Overview
+
+CelerBuild Pro Version supports multiple roles with different responsibilities:
+
+1. **Space Owner**
+    - Creates projects within their space
+    - Oversees all projects in their space
+    - Has access to all project settings (but typically delegates project member management to Project Owners)
+
+<Callout type="info">
+    While Space Owners have full access rights to all projects in their space, it's recommended to delegate day-to-day project management and member management to Project Owners.
+</Callout>
+
+2. **Project Owner**
+    - Manages project settings and configurations
+    - Manage project members and their roles
+    - Reviews and approves deployments
+
+3. **Project Master**
+    - Reviews deployment requests
+    - Monitors deployment quality
+    - Performs rollback when necessary
+
+4. **Developer**
+    - Initiates deployment requests
+    - Executes approved deployments
+    - Initiates rollback requests
+    - Executes approved rollbacks
+    - Manages deployment tasks
+
+5. **Reporter**
+    - Views project information
+    - Monitors deployment progress
+    - Accesses deployment history
+
+## Role-specific Guides
+
+- [Space Owner Guide](./pro-version-guide/space-owner-guide)
+- [Project Owner Guide](./pro-version-guide/project-owner-guide)
+- [Project Master Guide](./pro-version-guide/project-master-guide)
+- [Developer Guide](./pro-version-guide/developer-guide)
+- [Reporter Guide](./pro-version-guide/reporter-guide)

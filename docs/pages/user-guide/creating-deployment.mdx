@@ -1,0 +1,92 @@
+# Creating a Deployment
+
+This guide walks you through the process of initiating a deployment in CelerBuild.
+
+## Deployment Types
+
+CelerBuild supports two types of deployments based on your project configuration:
+
+### Branch Deployment
+- Deploy from a specific branch
+- Click the sync icon next to "Branch" to update the available branch list
+- Suitable for development and testing environments
+
+![apply-for-deployment-branch](https://github.com/user-attachments/assets/b905c227-7e65-4b31-9b06-de421be5bea3)
+
+### Tag Deployment
+- Deploy from a specific tag
+- Click the sync icon next to "Tag" to view available tags
+- Recommended for production environments
+- Tags represent stable versions of your code
+
+![apply-for-deployment-tag](https://github.com/user-attachments/assets/4ef25369-f5b6-494f-b8e7-ec73c0de53fd)
+
+## Creating a Deployment Request
+
+1. Navigate to `OPERATIONS/Applications` in the main menu
+
+2. Click on "Apply Deploy" to start a new deployment ticket
+
+> **Note**: Before proceeding, carefully verify:
+   > - Project: Ensure you've selected the correct project for deployment
+   > - Space: Confirm the space matches your target project
+   > - Env: Double-check if the environment (development/staging/production) is correct
+   >
+   > This verification helps prevent accidental deployments to wrong projects or environments.
+
+
+3. Fill in the required information:
+    - Title: A brief, descriptive name for your deployment
+    - Description: Details about what's being deployed
+
+4. Choose deployment type and version:
+     - For Branch deployment:
+          - Click the sync icon next to "Branch"
+          - Select the desired branch from the updated list
+     - For Tag deployment:
+          - Click the sync icon next to "Tag"
+          - Choose the appropriate tag from the list
+
+5. Select a reviewer (Pro version only):
+    - Choose one team member to review the deployment request
+    - Standard version: System automatically approves deployments
+
+6. Click "Submit Application" to create the deployment request
+
+> **Note**: In the Standard version, deployments are automatically approved without manual review. The Pro version requires selecting a reviewer for additional deployment control and safety.
+
+![image](https://github.com/user-attachments/assets/8ede609f-4be7-4d43-8e6f-0af6a89ba0e9)
+![image](https://github.com/user-attachments/assets/9f56a1dc-b297-4593-be5f-dec0e61f477b)
+
+## Managing Branch and Tag Limits
+
+The number of branches or tags available for selection is determined by your project settings.
+
+> **Tip**: Limiting the number of branches or tags can improve loading times. Too many options may slow down the interface.
+
+To adjust these settings:
+1. Go to your project settings
+2. Find the section for branch/tag limits
+3. Set your preferred limits
+
+![add-project-branch-limit](https://github.com/user-attachments/assets/05ebee92-34e4-4629-8077-b4c37bc75d30)
+
+![add-project-tag-limit](https://github.com/user-attachments/assets/20ba9168-4a7d-46f1-af2d-92999d47d3a3)
+
+## Viewing and Managing Deployment Tickets
+
+After submitting a deployment request, you can track its progress in the Tickets section.
+
+- **Standard Version**: Deployment requests are automatically approved without review.
+- **Pro Version**: You can enable a review process for deployments.
+
+![tickets-overview](https://github.com/user-attachments/assets/42c08a08-1671-47e0-8299-f3b023a2c3c3)
+
+## Best Practices
+
+- Use clear, concise titles for your deployment tickets
+- Provide detailed descriptions to track changes effectively
+- Regularly clean up old branches and tags to maintain performance
+- For critical deployments, consider using the Pro version's review feature
+
+By following these steps and best practices, you can efficiently manage your deployments in CelerBuild.

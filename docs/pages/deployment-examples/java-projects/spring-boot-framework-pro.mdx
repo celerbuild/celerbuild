@@ -1,0 +1,612 @@
+# Deploying Java Projects with CelerBuild Pro Using the Spring Boot Framework Example
+
+This guide demonstrates how to deploy a Java project using CelerBuild Pro Version, covering branch deployment, tag deployment, and tag version rollback operations with multiple roles. We'll use the [celerbuild-example-java](https://github.com/celerbuild/celerbuild-example-java) project built with the Spring Boot framework.
+> **Note**
+> This tutorial uses the Pro Version. For Standard Version features, please refer to the [Standard Version Guide](/deployment-examples/java-projects/spring-boot-framework).
+
+## Prerequisites
+
+> **Important Note**:
+> - For this tutorial, Java and Maven installation is required on the target server
+> - Local Java and Maven installation is recommended depending on your build strategy:
+>   - If building locally and uploading to remote server: both local and remote installation needed
+>   - If building only on remote server: only remote installation needed
+> - The System Service Setup must be configured on the target deployment server
+
+### 1. System Prerequisites
+Complete all [Prerequisites](/prerequisites) setup steps.
+
+### 2. Java Environment Setup
+
+#### Installing Java and Maven
+
+##### macOS
+```bash
+# Using Homebrew
+brew install openjdk@17
+brew install maven
+
+# Create system Java symlink
+sudo ln -sfn /usr/local/opt/openjdk@17/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-17.jdk
+
+# Add to ~/.zshrc
+echo 'export PATH="/usr/local/opt/openjdk@17/bin:$PATH"' >> ~/.zshrc
+echo 'export JAVA_HOME="/usr/local/opt/openjdk@17"' >> ~/.zshrc
+
+# Verify installation
+java --version
+mvn --version
+```
+
+##### Ubuntu/Debian
+```bash
+# Update package list
+sudo apt update
+
+# Install Java and Maven
+sudo apt install openjdk-17-jdk maven
+
+# Verify installation
+java --version
+mvn --version
+```
+
+##### CentOS/RHEL
+```bash
+# Install Java and Maven
+sudo yum install java-17-openjdk-devel maven
+
+# Verify installation
+java --version
+mvn --version
+```
+
+### 3. System Service Setup
+
+On the target deployment server, create a systemd service file for managing the Spring Boot application. This step is required for proper application management and auto-restart capabilities.
+
+> **Important**: This setup must be performed on each target deployment server.
+
+```bash copy
+sudo vim /etc/systemd/system/celerbuild-example-java.service
+```
+
+Add the following content:
+
+```ini copy
+[Unit]
+Description=CelerBuild Example Java Application
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/celerbuild-example-java
+Environment=SPRING_PROFILES_ACTIVE=dev
+ExecStart=java -jar app.jar --spring.profiles.active=${SPRING_PROFILES_ACTIVE}
+SuccessExitStatus=143
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+> **Configuration Notes**:
+> - User:
+>   - Change `ubuntu` to your actual service user
+>   - Ensure the user has proper permissions to run the application
+>   - Example: `User=deploy` if using a deploy user
+> - WorkingDirectory:
+>   - Adjust `/home/ubuntu/...` to match your user's home directory
+>   - Must be an absolute path
+>   - Example: `/home/deploy/celerbuild-example-java` for deploy user
+> - Environment:
+>   - Set `SPRING_PROFILES_ACTIVE=dev` for development environment
+>   - Set `SPRING_PROFILES_ACTIVE=prod` for production environment
+>   - This value determines which Spring profile to use
+> - ExecStart:
+>   - The path to Java executable should be accessible to the service user
+>   - The jar file name should match your actual application jar
+>   - Example: `ExecStart=/usr/bin/java -jar app.jar`
+
+## Role Setup and Permissions
+
+### 1. Team Structure
+- Leader (Tom): Admin + Space Owner + Project Owner
+    - Username: tom
+    - Email: tom@example.com
+
+- Developer A (Jerry): Project Master
+    - Username: jerry
+    - Email: jerry@example.com
+
+- Developer B (Bob): Developer
+    - Username: bob
+    - Email: bob@example.com
+
+### 2. Initial Setup Process (by Tom)
+
+#### 2.1 Create Users
+1. Navigate to `Base/Users`
+2. Create team members' accounts:
+```
+Create Jerry's account:
+- Username: jerry
+- Email: jerry@example.com
+
+Create Bob's account:
+- Username: bob
+- Email: bob@example.com
+   ```
+
+> **Note**:
+> - By default, there is an admin user
+> - You can promote yourself (Tom) to admin and then delete the default admin user
+> - At least one admin user must exist in the system at all times
+
+![create-user-1](https://github.com/user-attachments/assets/9216f24f-ff3b-4be2-a9e6-b29a23d4a0d8)
+
+![create-user-2](https://github.com/user-attachments/assets/d885eea8-968d-464f-a088-191afb6cfa5c)
+
+
+#### 2.2 Create Space
+1. Navigate to `Global/Spaces`
+2. Create new space:
+     - Name: java-example-space
+     - Description (Optional): A dedicated space for Java language deployment examples, including Spring Boot framework and other Java-based applications.
+
+![image](https://github.com/user-attachments/assets/d3f3fa07-c2fa-4674-ac6a-21c9b757ce69)
+
+#### 2.3 Import Space Members
+
+Import members from the global user pool to ensure team members have access and can collaborate.
+
+1. Locate the space you just added.
+2. In the corresponding Actions menu, find and click the **Members** button.
+3. Click on **Import Members** to proceed with the import.
+
+![image](https://github.com/user-attachments/assets/1da7b753-1410-480d-8745-0a44725660e1)
+
+![image](https://github.com/user-attachments/assets/6b9faf07-8522-4c87-b8d5-c2dddae843d2)
+
+#### 2.4 Set Space Owner
+
+Designate a member as the space owner, responsible for managing resources and permissions within the space.
+In this example, set Tom as the Space Owner.
+
+1. Locate the user named Tom.
+2. In the corresponding Actions menu, click **Edit**.
+3. Change his permissions to **Owner**.
+
+![image](https://github.com/user-attachments/assets/a6718e65-4905-4f28-8624-27f3f57cca06)
+
+### 3. Create Server Infrastructure
+
+#### 3.1 Create Server Clusters
+1. Navigate to `Global/Server Clusters`
+2. Create development cluster:
+ - Click "New"
+ - Fill in cluster details:
+      - Name: pro-example-java-server-cluster(dev)
+      - Select Environment: dev
+      - Select Status: Available
+ - Click "Create"
+
+![image](https://github.com/user-attachments/assets/ce5c2002-6103-4f2c-8040-772753aacd87)
+
+3. Create production cluster:
+  - Click "New"
+  - Fill in cluster details:
+   - Name: pro-example-java-server-cluster(prod)
+   - Select Environment: prod
+   - Select Status: Available
+  - Click "Create"
+
+![image](https://github.com/user-attachments/assets/fbb83a2d-3491-4efe-ab51-282232a1b3c0)
+
+#### 3.2 Add Servers
+1. Navigate to `Global/Servers`
+2. Add development server:
+ - Click "New"
+ - Fill in server details:
+   - Select cluster: pro-example-java-server-cluster(dev)
+   - Server Name: pro-java-dev-server-1
+   - Server IP: Your server IP
+   - SSH Port: Your SSH port (default: 22)
+ - Click "Create"
+
+![image](https://github.com/user-attachments/assets/999285f4-beee-47da-b244-7c5bf43f7233)
+
+3. Add production server:
+ - Click "New"
+ - Fill in server details:
+      - Select cluster: pro-example-java-server-cluster(prod)
+      - Server Name: pro-java-prod-server-1
+      - Server IP: Your server IP
+      - SSH Port: Your SSH port (default: 22)
+ - Click "Create"
+
+![image](https://github.com/user-attachments/assets/ef9b26f5-f183-4e57-97d3-d2ebc38c8d50)
+
+> **Note**:
+> - Server names are prefixed with "pro-" to distinguish from standard version
+> - Ensure SSH access is properly configured for each server
+> - Multiple servers can be added to each cluster if needed
+
+
+#### 3.3 Import Space Server Clusters
+
+1. Locate the left navigation and select `Space Resources`, then choose `Server Cluster`.
+2. Switch to the space you created earlier, `java-example-space`.
+3. Click the "Import Server Clusters" button and select the existing server cluster from Global to import.
+
+Once imported, the space server cluster can be used as a selectable server cluster list for projects within the current space.
+
+![image](https://github.com/user-attachments/assets/9552a4e2-44da-4f9c-885f-c8d5594957ec)
+
+![image](https://github.com/user-attachments/assets/b62acc56-ce41-4916-92fc-4e21392d7ce8)
+
+![image](https://github.com/user-attachments/assets/72cac3d8-a18f-4e6d-b434-9ce01018f92d)
+
+### 4. Create Projects and Import Project Members
+
+#### 4.1 Development Project
+
+##### Download Template
+- Download project template: celerbuild-example-java-dev.yaml
+- Template source: [celerbuild-example-java dev template](https://github.com/celerbuild/celerbuild-example-java/blob/main/project-template/celerbuild-example-java-dev.yaml)
+
+![image](https://github.com/user-attachments/assets/be161d96-6adc-4f84-a8b8-af727b2b5345)
+
+##### Import Template
+The imported project name, Space, and server cluster need to be changed, and others need to be modified according to your own requirements
+
+1. Navigate to `Projects/Projects`
+2. Click "Import YAML"
+3. Upload the downloaded template
+4. Configure development project:
+      - Project name: "pro-celerbuild-example-java-dev"
+      - Select cluster: "pro-example-java-server-cluster(dev)"
+      - The development environment can choose not to enable deployment approval (It is off by default)
+5. Click "Create Project"
+
+![image](https://github.com/user-attachments/assets/030f56fc-b8fd-459b-856e-c3a7a2473df8)
+
+![image](https://github.com/user-attachments/assets/1643ac3d-4d1e-46ea-bb50-fdf68fab3bf8)
+
+![image](https://github.com/user-attachments/assets/1a8b4f83-46bf-4a14-b458-116ed92cdfbd)
+
+##### Import Project Members
+1. In the newly created project, find `Members` under the `Actions` menu and click to import project members.
+2. Click "Import Members" to add project members.
+3. After importing, assign specific roles to the members:
+     - Set Tom as the Project Owner
+     - Set Jerry as the Project Master
+     - Set Bob as the Developer
+
+![image](https://github.com/user-attachments/assets/55bf64d7-0abc-4a68-85e7-dd90e22feed9)
+
+![image](https://github.com/user-attachments/assets/cca0baf5-b13d-4d76-b2e4-9ca6a313f67d)
+
+![image](https://github.com/user-attachments/assets/ca888529-3b63-45de-9d48-61adbf7f8461)
+
+![image](https://github.com/user-attachments/assets/34e5a578-53e4-4bde-93b0-2c86eb956cca)
+
+![image](https://github.com/user-attachments/assets/1c274b2e-66a5-4250-82b2-6191d768434f)
+
+#### 4.2 Production Project
+
+##### Download Template
+- Download project template: celerbuild-example-java-prod.yaml
+- Template source: [celerbuild-example-java prod template](https://github.com/celerbuild/celerbuild-example-java/blob/main/project-template/celerbuild-example-java-prod.yaml)
+
+![image](https://github.com/user-attachments/assets/488fe981-9b79-4876-90ee-2cb1583cf8b0)
+
+##### Import Template
+
+The imported project name and server cluster need to be changed, and others need to be modified according to your own requirements
+
+1. Navigate to `Projects/Projects`
+2. Click "Import YAML"
+3. Upload the downloaded template
+4. Configure production project:
+     - Project name: "pro-celerbuild-example-java-prod"
+     - Select cluster: "pro-example-java-server-cluster(prod)"
+5. Click "Create Project"
+6. Enable deployment approval requirement
+
+![image](https://github.com/user-attachments/assets/d9d2888f-8107-429e-a547-ad0beead53e5)
+
+![image](https://github.com/user-attachments/assets/5afafd78-38e9-4d7e-9f1a-c00e1f80370c)
+
+##### Import Project Members
+1. In the newly created project, find `Members` under the `Actions` menu and click to import project members.
+2. Click "Import Members" to add project members.
+3. After importing, assign specific roles to the members:
+      - Set Tom as the Project Owner
+      - Set Jerry as the Project Master
+      - Set Bob as the Developer
+
+![image](https://github.com/user-attachments/assets/c21963b3-9a29-42b8-8990-dbf86d64b509)
+
+![image](https://github.com/user-attachments/assets/4629b31f-9fff-4bf5-946b-f27e924226b9)
+
+![image](https://github.com/user-attachments/assets/88f0fc61-9b68-4ff0-908b-df9b37fcd644)
+
+![image](https://github.com/user-attachments/assets/fddf760d-6acf-455c-9153-270688327917)
+
+![image](https://github.com/user-attachments/assets/74ecfdf0-fe7c-49e4-95f3-78e68d66b832)
+
+> **Note**:
+> - Development project allows direct deployment without approval
+> - Production project requires approval from Project Owner (Tom) or Project Master (Jerry)
+> - Make sure to review project settings before creation
+
+## Deployment Workflows
+
+### Development Environment
+> Note: Development environment deployments don't require approval
+
+#### Developer Role (Developer A or B)
+1. Create deployment application
+2. Execute deployment directly
+3. Monitor deployment status
+
+### Production Environment
+
+#### 1. Regular Deployment
+
+Developer Role (Developer A or B):
+- Create deployment application
+- Fill in deployment details
+- Submit for review
+- Execute approved deployment after review
+- Monitor deployment process
+
+Project Owner/Master Role (Leader/Developer A):
+- Review deployment application
+- Approve/Reject with comments
+- Monitor deployment status
+
+#### 2. Rollback Deployment
+Developer Role (Developer A or B):
+- Create rollback application
+- Select version to rollback
+- Submit for review
+- Execute approved rollback after review
+- Monitor rollback process
+
+Project Owner/Master Role (Leader/Developer A):
+- Review rollback application
+- Approve/Reject with comments
+- Monitor rollback status
+
+> **Note**:
+> - The developer who creates the deployment/rollback application is responsible for executing it after approval
+> - Project Owner/Master can review and approve but typically don't execute the deployment/rollback
+> - This workflow ensures that the developer who initiated the change is also responsible for its execution
+
+## Example Deployment Scenarios
+
+### Scenario 1: Development Branch Deployment
+1. Developer B (Bob) creates deployment for dev environment:
+
+Navigate to `Operations/Applications`
+- Select the space `java-example-space`.
+- Select project "pro-celerbuild-example-java-dev"
+- Fill in:
+    - Title: "Deploy version update to Dev"
+    - Description: "Deploy version update to Dev.Branch: dev"
+- Select dev branch (click the branch sync icon, and select the latest version)
+- Click "Submit Application"
+
+![image](https://github.com/user-attachments/assets/9b20b5c1-5196-4ef5-ae42-dd979afa6ac9)
+
+![image](https://github.com/user-attachments/assets/bb556955-49a0-4023-8ad6-6b42988c4eb6)
+
+2. Developer B (Bob) executes deployment:
+
+Navigate to `Operations/Tasks`
+- Find the deployment task
+- Click "Deploy"
+- Click "Start Deploy"
+- Monitor deployment progress in Operation Logs
+
+![image](https://github.com/user-attachments/assets/512d4484-1aa8-442a-a304-2db3a1f5234a)
+
+![image](https://github.com/user-attachments/assets/55c065e5-a9e3-4e18-8f71-bf355a8aa3ab)
+
+![image](https://github.com/user-attachments/assets/6e53f5d3-1dfd-4ba6-90a1-b6cf396dbfe7)
+
+3. Verify deployment:
+```bash
+# Check version endpoint
+curl http://server:8083/version
+{"version":"1.0.1"}
+
+# Check main endpoint
+curl http://server:8083/
+{"message":"Hello World from CelerBuild!"}
+```
+> **Note**:
+> - Replace "server" with your actual server IP address
+> - A response similar to `{"version":"1.0.1"}` indicates successful deployment
+> - If you cannot access the endpoint, check:
+>   - Server firewall settings
+>   - Port 8083 accessibility
+>   - Application running status
+
+### Scenario 2: Production Tag Deployment
+1. Developer B (Bob) creates deployment for prod environment:
+
+Navigate to `Operations/Applications`
+- Select project "pro-celerbuild-example-java-prod"
+- Fill in:
+    - Title: "Deploy v1.0.0 to Production"
+    - Description: "Updating production version to v1.0.0"
+- Submit for review
+
+![image](https://github.com/user-attachments/assets/d1c21413-a17b-4ab5-82f1-5ba94334c6fb)
+
+![image](https://github.com/user-attachments/assets/2b9e9a10-0a92-424f-b797-35b4f965f3aa)
+
+> **Note**:
+> - Here we select v1.0.0 as an example
+> - For testing rollback operations, you can:
+>   1. First deploy v1.0.0 (refer to [Rollback Operations](#rollback-operations))
+>   2. Then deploy v1.0.1
+>   3. Finally perform rollback to v1.0.0
+> - The deployment process remains the same regardless of which tag version you select
+
+
+2. Developer A (Jerry) reviews and approves:
+* 1. After logging in, ensure the correct space is selected.
+* 2. Check the notification icon for new messages. You'll see a new ticket assigned to you; click "View Details".
+* 3. Click "Review", select "Approved", provide feedback, and finally click "Submit Review".
+
+![image](https://github.com/user-attachments/assets/a38077ef-bcf2-4c8d-b14e-4cff578f0440)
+
+![image](https://github.com/user-attachments/assets/646549a8-ab1c-4e89-aa76-73171bdfb5d4)
+
+3. Developer B (Bob) executes deployment:
+
+* 1. After logging in, ensure the correct space is selected.
+* 2. Check the notifications for new messages. You'll see your ticket has been reviewed and approved; click "View Details".
+* 3. In the ticket details, click the "Deploy" button.
+* 4. Navigate to the specific task page, click "Start Deployment" to begin the deployment.
+* 5. Monitor the logs and server status. If any issues arise, a prompt will provide guidance.
+
+![image](https://github.com/user-attachments/assets/bfd3ffb8-fb2c-4e87-bc08-7b9b2734ddee)
+
+![image](https://github.com/user-attachments/assets/85cbd350-2260-48cb-870c-281c834137e2)
+
+![image](https://github.com/user-attachments/assets/ed195fb0-f9db-4e36-932a-a67be87e3191)
+
+![image](https://github.com/user-attachments/assets/541ee6b9-05b4-4265-beb9-31e517ff171f)
+
+4. Verify deployment:
+```bash
+# Check version endpoint
+curl http://server:8083/version
+{"version":"1.0.0"}
+
+# Check main endpoint
+curl http://server:8083/
+{"message":"Hello World from CelerBuild!"}
+```
+
+## Rollback Operations
+
+> **Note**:
+> - Branch deployment rollback is not demonstrated here because the system only maintains the latest committed version
+> - We'll demonstrate rollback using tag deployments instead
+> - Rollback can only be performed to previously deployed tags in the system
+
+### Tag Deployment Rollback Example
+
+#### 1. Initial Deployment (v1.0.0)
+> For detailed deployment steps, refer to the [Production Tag Deployment](/deployment-examples/java-projects/spring-boot-framework-pro#scenario-2-production-tag-deployment) section above.
+
+1. Developer B (Bob) creates deployment:
+
+Navigate to `Operations/Applications`
+- Select project "pro-celerbuild-example-java-prod"
+- Fill in:
+    - Title: "Initial Deploy v1.0.0"
+    - Description: "Initial production deployment:Version: v1.0.0"
+- Select tag "v1.0.0"
+- Submit for review
+
+2. Developer A (Jerry) reviews and approves
+3. Developer B (Bob) executes deployment
+4. Verify deployment:
+```bash
+curl http://server:8083/version
+{"version":"1.0.0"}
+```
+
+#### 2. Upgrade to v1.0.1
+> For detailed deployment steps, refer to the [Production Tag Deployment](/deployment-examples/java-projects/spring-boot-framework-pro#scenario-2-production-tag-deployment) section above.
+
+
+1. Developer B (Bob) creates deployment:
+
+Navigate to `Operations/Applications`
+- Select project "pro-celerbuild-example-java-prod"
+- Fill in:
+  - Title: "Upgrade to v1.0.1"
+  - Description: "Production version upgrade: From v1.0.0 To v1.0.1"
+- Select tag "v1.0.1"
+- Submit for review
+
+
+2. Developer A (Jerry) reviews and approves
+3. Developer B (Bob) executes deployment
+
+
+4. Verify upgrade:
+```bash
+curl http://server:8083/version
+{"version":"1.0.1"}
+```
+
+#### 3. Rollback to v1.0.0
+1. Developer B (Bob) initiates rollback:
+
+Navigate to `Operations/Applications`
+- Find project
+- Click Actions → "Apply Rollback"
+- Fill in:
+  - Title: "Rollback from v1.0.1 to v1.0.0"
+  - Description: "Rolling back production version"
+- Select rollback version v1.0.0
+- Submit for review
+
+![image](https://github.com/user-attachments/assets/c1673df4-1060-449a-8b67-c430c56d5f4b)
+
+![image](https://github.com/user-attachments/assets/95b7cace-d5cc-4464-a401-0d0b635c9884)
+
+2. Leader (Tom) reviews and approves:
+
+Navigate to `Operations/Applications`
+- Review rollback request
+- Select Review Status "Approved"
+- Add approval comments: "Rollback to v1.0.0 approved."
+- Click "Submit Review"
+
+![image](https://github.com/user-attachments/assets/dc9b7f1c-8397-4596-995a-cce13c82f93f)
+
+![image](https://github.com/user-attachments/assets/8bd23f28-ac2f-4af5-b92e-bc9e0d2c9697)
+
+> **Note**:
+> - Both Project Owner (Tom) and Project Master (Jerry) have permission to review rollback requests
+> - In this example, we demonstrate Tom reviewing the rollback for clarity of role responsibilities
+> - In practice, Jerry could also review and approve this rollback request
+
+3. Developer B (Bob) executes rollback:
+
+- Check the notifications for new messages. You'll see your ticket has been reviewed and approved; click "View Details".
+- Click "Rollback"
+- Click "Start Rollback"
+- Monitor rollback progress
+
+![image](https://github.com/user-attachments/assets/6e9a0ca9-cedf-4ae2-9b39-9dad2674865e)
+
+![image](https://github.com/user-attachments/assets/4ef88dd7-17a2-4009-a22d-0985e9391083)
+
+![image](https://github.com/user-attachments/assets/1c5af95a-a146-40a2-9b95-7745c6eb5e3f)
+
+![image](https://github.com/user-attachments/assets/4a53953d-3f48-47d4-ba75-cc1c51148c05)
+
+4. Verify rollback:
+```bash
+curl http://server:8083/version
+{"version":"1.0.0"}
+```
+
+For detailed rollback instructions, see:
+- [Rollback Deployment](/user-guide/rollback-deployment#initiating-a-rollback)
+- [Execute Deployment Task](/user-guide/execute-deployment-task)
+
+
+Congratulations! You have successfully learned how to deploy Spring Boot Framework using CelerBuild Pro Edition, including team-based deployment workflows, approval processes, and version management! 🎉
