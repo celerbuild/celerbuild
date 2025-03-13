@@ -1,3 +1,5 @@
+import { Callout } from 'nextra-theme-docs'
+
 # Deploying Go Projects with CelerBuild Pro Using the Gin Framework Example
 
 This guide demonstrates how to deploy a Go project using CelerBuild Pro Version, covering branch deployment, tag deployment, and tag version rollback operations with multiple roles. We'll use the [celerbuild-example-go](https://github.com/celerbuild/celerbuild-example-go) project built with the Gin framework.
@@ -38,27 +40,74 @@ go version
 
 ##### CentOS/RHEL
 ```bash
-# Install Go
+# Install Go via yum
 sudo yum install epel-release
 sudo yum install golang
 
 # Verify installation
 go version
+
+# Find Go installation path
+which go  # Usually shows /usr/bin/go
+ls -l /usr/bin/go  # Check actual path
+```
+
+##### Manual Installation (Recommended for specific versions)
+```bash
+# Download Go (replace version as needed)
+wget https://go.dev/dl/go1.24.0.linux-amd64.tar.gz
+
+# Remove any existing Go installation
+sudo rm -rf /usr/local/go
+
+# Extract to /usr/local
+sudo tar -C /usr/local -xzf go1.24.0.linux-amd64.tar.gz
+
+# Verify installation
+/usr/local/go/bin/go version
 ```
 
 #### Environment Variables
 Add these lines to your shell profile (~/.bashrc, ~/.zshrc, etc.):
+
+For yum installation (CentOS/RHEL):
 ```bash
-# Go environment variables
 export GOPATH=$HOME/go
-export GOROOT=/usr/local/go  # This might vary based on installation method
+export GOROOT=/usr/lib/golang
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 ```
 
-> **Note**:
-> - The deployment process uses [makefile](https://github.com/celerbuild/celerbuild-example-go/blob/dev/makefile) for testing and building
-> - Minimum Go version required: 1.16 or later
-> - After setting environment variables, run `source ~/.bashrc` (or your shell profile) to apply changes
+For apt installation (Ubuntu/Debian):
+```bash
+export GOPATH=$HOME/go
+export GOROOT=/usr/lib/go
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+```
+
+For manual installation:
+```bash
+export GOROOT=/usr/local/go
+export GOPATH=$HOME/go
+export PATH=/usr/local/go/bin:$PATH  # Put the new Go binary path first
+```
+
+Verify configuration:
+```bash
+# Reload profile
+source ~/.bashrc  # or source ~/.zshrc
+
+# Check environment
+go env GOROOT
+go env GOPATH
+go version
+```
+
+> **Important Notes**:
+> - Minimum Go version required: 1.23.1 or later
+> - For production use, we recommend using the manual installation method to ensure version consistency
+> - The deployment process uses [makefile](https://github.com/celerbuild/celerbuild-example-go/blob/dev/makefile) for building and testing
+> - Make sure to reload your shell profile after setting environment variables
+> - Different Linux distributions may have different Go installation paths
 
 ### 3. Build Tools Setup
 

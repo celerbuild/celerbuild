@@ -64,6 +64,13 @@
       "pagination": true
     }
   },
+  "changelog": {
+    "title": "Changelog",
+    "theme": {
+      "breadcrumb": false,
+      "pagination": true
+    }
+  },
   "faq": {
     "title": "FAQ",
     "theme": {

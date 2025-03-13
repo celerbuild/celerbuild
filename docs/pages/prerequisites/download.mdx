@@ -1,52 +1,128 @@
 import { Callout } from 'nextra-theme-docs'
 
-# Download and Install CelerBuild
+# Download CelerBuild
 
-These instructions will guide you through downloading and installing the latest version of CelerBuild.
+CelerBuild is distributed as a binary file that can be run directly after download. No installation is required.
 
 ## 1. Download
 
 First, determine the latest version of CelerBuild by visiting the [CelerBuild official website](https://celerbuild.com/download).
 
-Replace `{VERSION}` in the following commands with the actual latest version number.
-
-### macOS (darwin-amd64)
-
-```shell copy
-curl -O https://raw.githubusercontent.com/celerbuild/download/refs/heads/main/celerbuild-{VERSION}-darwin-amd64.tar.gz
+The download URL format is:
+```
+celerbuild-{VERSION}-{OS}-{ARCH}.tar.gz
 ```
 
-### Linux (x86_64)
+Where:
+- `{VERSION}`: CelerBuild version (e.g., 0.8.8)
+- `{OS}`: Operating system
+    - `darwin` (macOS)
+    - `linux` (Linux)
+- `{ARCH}`: CPU architecture
+    - `amd64` (Intel/AMD 64-bit)
+    - `arm64` (ARM 64-bit)
 
+For macOS with Intel/AMD CPU:
 ```shell copy
-curl -O https://raw.githubusercontent.com/celerbuild/download/refs/heads/main/celerbuild-{VERSION}-linux-amd64.tar.gz
+# macOS AMD64 example (version 0.8.8)
+curl -O https://raw.githubusercontent.com/celerbuild/download/refs/heads/main/celerbuild-0.8.8-darwin-amd64.tar.gz
 ```
 
-Alternatively, you can download directly from the official website by clicking the download button for your operating system.
+For macOS with Apple Silicon (M1/M2):
+```shell copy
+# macOS ARM64 example (version 0.8.8)
+curl -O https://raw.githubusercontent.com/celerbuild/download/refs/heads/main/celerbuild-0.8.8-darwin-arm64.tar.gz
+```
+
+For Linux with Intel/AMD CPU:
+```shell copy
+# Linux AMD64 example (version 0.8.8)
+curl -O https://raw.githubusercontent.com/celerbuild/download/refs/heads/main/celerbuild-0.8.8-linux-amd64.tar.gz
+```
+
+For Linux with ARM CPU:
+```shell copy
+# Linux ARM64 example (version 0.8.8)
+curl -O https://raw.githubusercontent.com/celerbuild/download/refs/heads/main/celerbuild-0.8.8-linux-arm64.tar.gz
+```
+
+### Download Options
+
+1. Direct Download:
+```shell copy
+curl -O https://raw.githubusercontent.com/celerbuild/download/refs/heads/main/celerbuild-0.8.8-darwin-amd64.tar.gz
+```
+
+2. Alternative Download Methods:
+    - Visit our official website: https://celerbuild.com/download
+    - Download from GitHub: https://github.com/celerbuild/download
+
+### Troubleshooting Download Issues
+
+If you encounter connection issues with githubusercontent.com:
+
+Alternative solutions:
+    - Use a VPN
+    - Use alternative DNS servers
+    - Download directly from our official website
+
+### Verify Download
+
+After downloading, verify the file integrity using SHA256 checksum:
+
+1. Get the checksum:
+```shell copy
+# For macOS
+shasum -a 256 celerbuild-0.8.8-darwin-amd64.tar.gz
+
+# For Linux
+sha256sum celerbuild-0.8.8-linux-amd64.tar.gz
+```
+
+2. Compare with the official checksum:
+```
+# macOS (darwin-amd64)
+7c35b8a779bdbbbf41315ae95505e55de3e4ea0048be89049ddf67c23d7f8c2d  celerbuild-0.8.8-darwin-amd64.tar.gz
+
+# Linux (amd64)
+ca5ba325c98723c3524a86a2065ed911debaa30c33871c656e229f2b2cd0a11d  celerbuild-0.8.8-linux-amd64.tar.gz
+```
+
+The checksums should match exactly. If they don't, the download may be corrupted or tampered with.
 
 ## 2. Extract the File
 
-Run the following command to extract the file:
-
 ```shell copy
-tar zxvf celerbuild-{VERSION}-{OS}-{ARCH}.tar.gz
-```
+# For macOS with Intel CPU (example)
+tar zxvf celerbuild-0.8.8-darwin-amd64.tar.gz
 
-Replace `{OS}` with either `darwin` or `linux`, and `{ARCH}` with your system architecture (e.g., `amd64`).
+# For macOS with Apple Silicon (example)
+tar zxvf celerbuild-0.8.8-darwin-arm64.tar.gz
+
+# For Linux with Intel CPU (example)
+tar zxvf celerbuild-0.8.8-linux-amd64.tar.gz
+```
 
 ## 3. Set Permissions
 
-Ensure the extracted file has execute permissions:
-
 ```shell copy
-chmod +x celerbuild-{VERSION}-{OS}-{ARCH}
+# For macOS with Intel CPU (example)
+chmod +x celerbuild-0.8.8-darwin-amd64
+
+# For Linux with Intel CPU (example)
+chmod +x celerbuild-0.8.8-linux-amd64
 ```
 
 ## 4. Run CelerBuild
 
 ### Foreground Mode
+
 ```shell copy
-./celerbuild-{VERSION}-{OS}-{ARCH}
+# For macOS with Intel CPU (example)
+./celerbuild-0.8.8-darwin-amd64
+
+# For Linux with Intel CPU (example)
+./celerbuild-0.8.8-linux-amd64
 ```
 
 ### Background Mode (Recommended for Production)
@@ -201,7 +277,8 @@ ps aux | grep celerbuild
 
 ## Next Steps
 
-After successful installation:
-1. [Activate CelerBuild](./activation)
-2. [Configure Database](./database-configuration)
-3. [Setup Remote Sync](./remote-sync-setup)
+After downloading and setting up CelerBuild:
+
+1. [Database Configure](./database-configuration)
+
+2. [Activation](./activation)

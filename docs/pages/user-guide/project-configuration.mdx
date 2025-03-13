@@ -15,16 +15,35 @@ import { Callout } from 'nextra-theme-docs'
 
 CelerBuild project configuration consists of four main sections: Project Information, Repository Settings, Deployment Configuration, and Deployment Commands. This guide will help you understand and set up each section effectively.
 
+## Quick Start with Project Templates
+CelerBuild provides example project templates for quick setup. You can import these templates to get started:
+
+### Available Templates
+    - [Java Example](https://github.com/celerbuild/celerbuild-example-java/tree/main/project-template)
+    - [Python Example](https://github.com/celerbuild/celerbuild-example-python/tree/main/project-template)
+    - [Node.js Example](https://github.com/celerbuild/celerbuild-example-nodejs/tree/main/project-template)
+    - [Go Example](https://github.com/celerbuild/celerbuild-example-go/tree/main/project-template)
+    - [PHP Example](https://github.com/celerbuild/celerbuild-example-php/tree/main/project-template)
+
+Each template includes:
+    - Development environment configuration
+    - Production environment configuration
+    - Pre-deployment and post-deployment commands
+    - Build commands examples
+
 ## Configuration Overview
 
-![configuration-project-overview-1](https://github.com/user-attachments/assets/60ef80e7-038b-4d95-9148-8d1572c94159)
-![configuration-project-overview-2](https://github.com/user-attachments/assets/3e88b7cf-c622-4ddb-a831-66c54e48d39f)
+![image](https://github.com/user-attachments/assets/424adf62-bfb7-4382-944b-619802ecb5a4)
+
+![image](https://github.com/user-attachments/assets/236e21be-da30-40e2-b7ec-f8851c8ebe8a)
 
 ### Space Selection
 
-- **Standard Version**: Use the 'default' space.
-- **Pro Version**: Create and manage multiple spaces.
-- Organize projects by team or department.
+- **Standard Version**:
+    - Use the 'default' space.
+- **Pro Version**:
+   - Create and manage multiple spaces.
+   - Organize projects by team or department.
 
 ## 1. Project Information
 
@@ -51,25 +70,31 @@ Configure your source code repository settings:
 2. **Branch/Tag Settings**
     - Branch: Specify which branches to use
     - Tag: Set the number of latest tags to display
-    - Limiting branches/tags improves synchronization efficiency
+
+> Note: Limiting branches/tags improves synchronization efficiency
 
 ## 3. Deployment Configuration
 
 Set up your deployment environment:
 
-1. **Target Deployment Path**
+1. **Deployment User**
+     - Specify user account for deployment execution
+     - Must exist on all cluster servers
+     - Requires necessary permissions
+
+2. **Target Deployment Path**
     - Specify the server path for project deployment
     - Example: `/var/www/myapp`
 
-2. **Target Repository Path**
+3. **Target Deploy Warehouse Path**
     - Define storage location for project packages
     - Example: `/var/repositories/myapp`
 
-3. **Version Retention**
+4. **Version Retention**
     - Set number of project versions to retain
     - Helps manage disk space and rollback options
 
-4. **Server Cluster**
+5. **Server Cluster**
     - **Pro Version**:
         - Choose a deployment server cluster.
         - Server clusters must be imported into the current space resources to be selectable.
@@ -78,12 +103,27 @@ Set up your deployment environment:
         - Select server clusters from global options, as space resources management is not available.
         - Manage multiple servers as a single unit.
 
-5. **Deployment User**
-    - Specify user account for deployment execution
-    - Must exist on all cluster servers
-    - Requires necessary permissions
+
 
 ## 4. Deployment Commands
+
+### Built-in Variables
+CelerBuild provides several built-in variables for deployment commands:
+
+| Variable | Description | Source |
+|----------|-------------|---------|
+| `${DEPLOY_USER}` | User account for deployment execution, configured in project settings | From: Deployment Configuration > Deployment User |
+| `${TARGET_DEPLOYMENT_PATH}` | Base deployment path on target server | From: Deployment Configuration > Target Deployment Path |
+| `${TARGET_DEPLOYMENT_PROJECT_NAME}` | System-generated project directory name (format: project_[ID]) | System Generated: project_[ProjectID] |
+| `${LOCAL_PACKAGE_FILE}` | System-generated package filename (Note: Only valid in build commands)  |  See Note below |
+| `${TASK_ID}` | Current deployment task ID | System Generated |
+| `${VERSION_COMMIT_HASH}` | Git commit hash of current deployment | From: Git Repository |
+
+> **Note:**
+> - Package file path (`${LOCAL_PACKAGE_FILE}`) components:
+>   - Base path: configured in local_deploy_warehouse_path
+>   - Project folder: system generated project name
+>   - File name: timestamp in YYYYMMDDHHMMSS format with .tar.gz extension
 
 Configure the commands for your deployment process:
 
@@ -91,11 +131,27 @@ Configure the commands for your deployment process:
 
 Example usage:
 ```shell copy
-make build && cd build && tar -zcvf ${LOCAL_PACKAGE_FILE} *
+  # Check the operating system type
+  OS=$(uname)
+
+  # Build the application
+  echo "Building the application..."
+  make build
+
+  # Change to build directory
+  cd build
+
+  # Create package based on OS type
+  if [ "$OS" = "Darwin" ]; then
+      # For macOS, include mac-specific options
+      tar --no-xattrs --no-mac-metadata -zcvf ${LOCAL_PACKAGE_FILE} *
+  else
+      # For Linux and other systems, use standard options
+      tar --no-xattrs -zcvf ${LOCAL_PACKAGE_FILE} *
+  fi
 ```
 
 Key points about build commands:
-    - Customize `make build && cd build` for your project
     - Keep `tar -zcvf ${LOCAL_PACKAGE_FILE} *` as the final command
     - `${LOCAL_PACKAGE_FILE}` is a required CelerBuild variable
 
@@ -105,8 +161,19 @@ Commands executed before the main deployment:
 Example usage:
 
 ```shell copy
+# Define project directory path
 PROJECT_DIR="${TARGET_DEPLOYMENT_PATH}/${TARGET_DEPLOYMENT_PROJECT_NAME}"
-[ -d "$PROJECT_DIR" ] && cd "$PROJECT_DIR" && ./stop.sh
+
+# Check if directory exists and execute stop script
+if [ -d "$PROJECT_DIR" ]; then
+    # Change to project directory
+    cd "$PROJECT_DIR"
+    # Execute stop script
+    ./stop.sh
+else
+    # Print error message if directory not found
+    echo "Directory $PROJECT_DIR does not exist"
+fi
 ```
 
 ### Post-deployment Commands (Optional)
@@ -115,22 +182,8 @@ Commands executed after deployment completion:
 Example usage:
 
 ```shell copy
+# Change to project directory and execute start script
 cd "${TARGET_DEPLOYMENT_PATH}/${TARGET_DEPLOYMENT_PROJECT_NAME}" && ./start.sh
-```
-
-## Built-in Environment Variables
-
-CelerBuild provides these variables for your deployment scripts:
-
-    - `${LOCAL_PACKAGE_FILE}`: Package file path
-    - `${TARGET_DEPLOYMENT_PATH}`: Deployment path
-    - `${TARGET_DEPLOYMENT_PROJECT_NAME}`: Project name on target server
-
-Example usage:
-
-```shell copy
-PROJECT_DIR="${TARGET_DEPLOYMENT_PATH}/${TARGET_DEPLOYMENT_PROJECT_NAME}"
-[ -d "$PROJECT_DIR" ] && cd "$PROJECT_DIR" && ./stop.sh || echo "Directory $PROJECT_DIR does not exist"
 ```
 
 ## Best Practices
